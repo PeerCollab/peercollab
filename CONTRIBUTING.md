@@ -21,9 +21,11 @@ Welcome to the PeerCollab codebase. This guide explains how we work together as 
 
 We use three levels of branches:
 
+```
 main ─── stable, demo-ready code only. Never pushed to directly.
 └── dev ─── integration branch. All features merge here first.
-└── feature/xxx ─── individual work branches.
+    └── feature/xxx ─── individual work branches.
+```
 
 - `main` - reflects the final stable version of the project. Only merged from `dev` when the team agrees everything is working and tested.
 - `dev` - the active development branch. All pull requests target this branch.
