@@ -1,0 +1,15 @@
+body {
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+.nav-link {
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: #e4e0fa;
+  border-radius: 999px;
+}
