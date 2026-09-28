@@ -14,7 +14,6 @@
       <span class="font-bold text-2xl text-slate-900">PeerCollab</span>
     </div>
 
-    <!-- Headline + features -->
     <div>
       <h1 class="text-3xl [@media(min-height:800px)]:text-4xl font-bold text-slate-900 mb-2 [@media(min-height:700px)]:mb-3">
         Study better.<br />Build <span class="text-violet-600">together.</span>
@@ -63,7 +62,6 @@
       </div>
     </div>
 
-    <!-- Illustration: fills all leftover space, sits on the bottom edge -->
     <div class="flex-1 min-h-0 flex items-end justify-center mt-2 overflow-hidden">
       <img src="/static/images/hero-illustration.png" alt="Students collaborating"
         class="max-h-full max-w-full w-auto object-contain object-bottom" />
@@ -121,7 +119,6 @@
 </div>
 
 <script>
-  // Already logged in? Go to the dashboard instead
   if (localStorage.getItem("access_token")) {
     window.location.replace("/");
   }
@@ -168,7 +165,6 @@
       const data = await res.json();
 
       if (!res.ok) {
-        // Validation errors come back as a list, other errors as a string
         const detail = Array.isArray(data.detail)
           ? "Please check your details and try again."
           : data.detail || "Registration failed.";
@@ -180,7 +176,6 @@
             successBox.textContent = "Account created! Logging you in...";
       successBox.classList.remove("hidden");
 
-      // Log the new user in automatically with the same credentials
       const loginBody = new URLSearchParams();
       loginBody.append("username", email);
       loginBody.append("password", password);
@@ -196,7 +191,6 @@
         localStorage.setItem("access_token", loginData.access_token);
         window.location.replace("/");
       } else {
-        // Account exists but auto-login failed, so fall back to the login page
         window.location.replace("/auth/login");
       }
     } catch (err) {

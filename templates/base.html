@@ -4,25 +4,10 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% block title %}PeerCollab{% endblock %}</title>
+        <title>{% block title %}PeerCollab{% endblock %}</title>
     <script>
         // Send visitors without a token to the login page
         if (!localStorage.getItem("access_token")) {
-            window.location.replace("/auth/login");
-        }
-
-        // Log out: tell the server, then delete the token from this browser
-        async function logout() {
-            const token = localStorage.getItem("access_token");
-            try {
-                await fetch("/auth/logout", {
-                    method: "POST",
-                    headers: { Authorization: "Bearer " + token },
-                });
-            } catch (err) {
-                // Even if the request fails, still log the user out locally
-            }
-            localStorage.removeItem("access_token");
             window.location.replace("/auth/login");
         }
     </script>
@@ -41,7 +26,7 @@
         <aside class="w-64 shrink-0 bg-white border-r border-slate-100 flex flex-col h-full">
             <!-- Logo -->
             <div class="flex items-center gap-2.5 px-6 h-16 border-b border-slate-100 shrink-0">
-                <img src="/static/images/logo.png" alt="PeerCollab Logo" width="50" height="50" />
+                <img src="static/images/logo.png" alt="PeerCollab Logo" width="50" height="50" />
                 <span class="font-semibold text-[17px] text-slate-900">PeerCollab</span>
             </div>
 
@@ -171,7 +156,7 @@
                             class="hidden absolute right-0 mt-2 w-44 bg-white border border-slate-100 rounded-lg shadow-lg py-1 z-50">
                             <a href="/profile" class="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">My
                                 Profile</a>
-                            <a href="#" onclick="logout(); return false;"
+                            <a href="/logout"
                                 class="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">Logout</a>
                         </div>
                     </div>
