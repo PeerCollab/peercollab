@@ -1,0 +1,15 @@
+## Migration rules
+
+Everyone can run:
+- alembic upgrade head (apply migrations to your local database after pulling)
+- alembic current, alembic heads, alembic history (read-only checks)
+
+Team lead only:
+- alembic revision --autogenerate (create a migration)
+- alembic merge heads
+- alembic downgrade
+
+Workflow:
+1. Add your model in app/models/ and open a PR. Do not create a migration file.
+2. The team lead merges the PR, generates the migration in a follow-up PR, and tells the team.
+3. Everyone pulls and runs alembic upgrade head.
