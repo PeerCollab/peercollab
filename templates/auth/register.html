@@ -1,0 +1,208 @@
+{% extends "auth_base.html" %}
+
+{% block title %}Sign up - PeerCollab{% endblock %}
+
+{% block content %}
+<div class="flex h-screen overflow-hidden">
+  <!-- LEFT PANEL -->
+  <div class="hidden lg:flex w-1/2 flex-col px-12 pt-5 pb-0 [@media(min-height:700px)]:pt-10 bg-gradient-to-br from-violet-50 to-purple-100 overflow-hidden">
+
+    <!-- Brand -->
+    <div class="flex items-center gap-3 mb-4 [@media(min-height:700px)]:mb-8 [@media(min-height:800px)]:mb-14">
+      <img src="/static/images/logo.png" alt="PeerCollab Logo"
+        class="w-12 h-12 [@media(min-height:700px)]:w-14 [@media(min-height:700px)]:h-14 object-contain" />
+      <span class="font-bold text-2xl text-slate-900">PeerCollab</span>
+    </div>
+
+    <!-- Headline + features -->
+    <div>
+      <h1 class="text-3xl [@media(min-height:800px)]:text-4xl font-bold text-slate-900 mb-2 [@media(min-height:700px)]:mb-3">
+        Study better.<br />Build <span class="text-violet-600">together.</span>
+      </h1>
+      <p class="text-sm [@media(min-height:700px)]:text-base text-slate-600 mb-3 [@media(min-height:700px)]:mb-5 [@media(min-height:800px)]:mb-8">
+        PeerCollab helps students collaborate on projects, manage tasks, share resources, and achieve more — together.
+      </p>
+
+      <div class="space-y-2 [@media(min-height:700px)]:space-y-3 [@media(min-height:800px)]:space-y-4">
+        <div class="flex items-start gap-3">
+          <div class="w-9 h-9 bg-violet-100 rounded-lg flex items-center justify-center shrink-0">
+            <i data-lucide="users" class="w-5 h-5 text-violet-600"></i>
+          </div>
+          <div>
+            <p class="font-semibold text-slate-900">Collaborate Seamlessly</p>
+            <p class="text-sm text-slate-600">Work with your peers in real time.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-9 h-9 bg-green-100 rounded-lg flex items-center justify-center shrink-0">
+            <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+          </div>
+          <div>
+            <p class="font-semibold text-slate-900">Stay Organized</p>
+            <p class="text-sm text-slate-600">Manage tasks, deadlines, and files in one place.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-9 h-9 bg-orange-100 rounded-lg flex items-center justify-center shrink-0">
+            <i data-lucide="message-circle" class="w-5 h-5 text-orange-600"></i>
+          </div>
+          <div>
+            <p class="font-semibold text-slate-900">Smart Suggestions</p>
+            <p class="text-sm text-slate-600">AI-powered task suggestions to keep you on track.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
+            <i data-lucide="file-lock-2" class="w-5 h-5 text-blue-600"></i>
+          </div>
+          <div>
+            <p class="font-semibold text-slate-900">Secure &amp; Private</p>
+            <p class="text-sm text-slate-600">Your data is safe with us.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Illustration: fills all leftover space, sits on the bottom edge -->
+    <div class="flex-1 min-h-0 flex items-end justify-center mt-2 overflow-hidden">
+      <img src="/static/images/hero-illustration.png" alt="Students collaborating"
+        class="max-h-full max-w-full w-auto object-contain object-bottom" />
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="w-full lg:w-1/2 flex flex-col justify-center px-8 sm:px-16 lg:px-24 bg-white overflow-y-auto">
+    <div class="flex justify-end mb-6 text-sm">
+      <span class="text-slate-500">Already have an account?</span>
+      <a href="/auth/login" class="text-violet-600 font-medium ml-1 hover:underline">Log in</a>
+    </div>
+
+    <h2 class="text-2xl font-bold text-slate-900 mb-1">Create your account</h2>
+    <p class="text-slate-500 mb-6">Sign up and start collaborating with your peers.</p>
+
+    <div id="error-box" class="hidden mb-4 px-4 py-3 rounded-lg bg-red-50 text-red-600 text-sm"></div>
+    <div id="success-box" class="hidden mb-4 px-4 py-3 rounded-lg bg-green-50 text-green-700 text-sm"></div>
+
+    <form id="register-form" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1.5">Full name</label>
+        <input type="text" id="full_name" required
+          class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
+          placeholder="Enter your full name" />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1.5">Email address</label>
+        <input type="email" id="email" required
+          class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
+          placeholder="Enter your email" />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1.5">Password</label>
+        <input type="password" id="password" required minlength="8"
+          class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
+          placeholder="At least 8 characters" />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1.5">Confirm password</label>
+        <input type="password" id="confirm_password" required
+          class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
+          placeholder="Re-enter your password" />
+      </div>
+
+      <button type="submit" id="submit-btn"
+        class="w-full bg-violet-600 hover:bg-violet-700 text-white font-medium py-2.5 rounded-lg transition disabled:opacity-60">
+        Create account
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Already logged in? Go to the dashboard instead
+  if (localStorage.getItem("access_token")) {
+    window.location.replace("/");
+  }
+
+  const form = document.getElementById("register-form");
+  const errorBox = document.getElementById("error-box");
+  const successBox = document.getElementById("success-box");
+  const submitBtn = document.getElementById("submit-btn");
+
+  function showError(message) {
+    successBox.classList.add("hidden");
+    errorBox.textContent = message;
+    errorBox.classList.remove("hidden");
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    errorBox.classList.add("hidden");
+    successBox.classList.add("hidden");
+
+    const full_name = document.getElementById("full_name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    const confirm = document.getElementById("confirm_password").value;
+
+    if (password.length < 8) {
+      showError("Password must be at least 8 characters.");
+      return;
+    }
+    if (password !== confirm) {
+      showError("Passwords do not match.");
+      return;
+    }
+
+    submitBtn.disabled = true;
+
+    try {
+      const res = await fetch("/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ full_name, email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        // Validation errors come back as a list, other errors as a string
+        const detail = Array.isArray(data.detail)
+          ? "Please check your details and try again."
+          : data.detail || "Registration failed.";
+        showError(detail);
+        submitBtn.disabled = false;
+        return;
+      }
+
+            successBox.textContent = "Account created! Logging you in...";
+      successBox.classList.remove("hidden");
+
+      // Log the new user in automatically with the same credentials
+      const loginBody = new URLSearchParams();
+      loginBody.append("username", email);
+      loginBody.append("password", password);
+
+      const loginRes = await fetch("/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: loginBody,
+      });
+
+      if (loginRes.ok) {
+        const loginData = await loginRes.json();
+        localStorage.setItem("access_token", loginData.access_token);
+        window.location.replace("/");
+      } else {
+        // Account exists but auto-login failed, so fall back to the login page
+        window.location.replace("/auth/login");
+      }
+    } catch (err) {
+      showError("Something went wrong. Please try again.");
+      submitBtn.disabled = false;
+    }
+  });
+</script>
+{% endblock %}
