@@ -1,5 +1,7 @@
+import os
 from logging.config import fileConfig
 
+from dotenv import load_dotenv
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
@@ -9,6 +11,7 @@ load_dotenv()
 
 from app.database import Base
 # import the model files here
+from app.models import user  # noqa: F401
 # ex: from app.models import user
 
 # this is the Alembic Config object, which provides
