@@ -4,10 +4,8 @@
 
 {% block content %}
 <div class="flex h-screen overflow-hidden">
-  <!-- LEFT PANEL -->
   <div class="hidden lg:flex w-1/2 flex-col px-12 pt-5 pb-0 [@media(min-height:700px)]:pt-10 bg-gradient-to-br from-violet-50 to-purple-100 overflow-hidden">
 
-    <!-- Brand -->
     <div class="flex items-center gap-3 mb-4 [@media(min-height:700px)]:mb-8 [@media(min-height:800px)]:mb-14">
       <img src="/static/images/logo.png" alt="PeerCollab Logo"
         class="w-12 h-12 [@media(min-height:700px)]:w-14 [@media(min-height:700px)]:h-14 object-contain" />
@@ -68,7 +66,6 @@
     </div>
   </div>
 
-  <!-- RIGHT PANEL -->
   <div class="w-full lg:w-1/2 flex flex-col justify-center px-8 sm:px-16 lg:px-24 bg-white overflow-y-auto">
     <div class="flex justify-end mb-6 text-sm">
       <span class="text-slate-500">Already have an account?</span>
@@ -134,7 +131,7 @@
 <script src="/static/js/passwordToggle.js"></script>
 <script>
   if (localStorage.getItem("access_token")) {
-    window.location.replace("/");
+    window.location.replace("/dashboard");
   }
 
   const form = document.getElementById("register-form");
@@ -187,26 +184,9 @@
         return;
       }
 
-            successBox.textContent = "Account created! Logging you in...";
+      successBox.textContent = "Account created! Redirecting to login...";
       successBox.classList.remove("hidden");
-
-      const loginBody = new URLSearchParams();
-      loginBody.append("username", email);
-      loginBody.append("password", password);
-
-      const loginRes = await fetch("/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: loginBody,
-      });
-
-      if (loginRes.ok) {
-        const loginData = await loginRes.json();
-        localStorage.setItem("access_token", loginData.access_token);
-        window.location.replace("/");
-      } else {
-        window.location.replace("/auth/login");
-      }
+      setTimeout(() => window.location.replace("/auth/login"), 1200);
     } catch (err) {
       showError("Something went wrong. Please try again.");
       submitBtn.disabled = false;
