@@ -4,7 +4,13 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% block title %}PeerCollab{% endblock %}</title>
+        <title>{% block title %}PeerCollab{% endblock %}</title>
+    <script>
+        // Send visitors without a token to the login page
+        if (!localStorage.getItem("access_token")) {
+            window.location.replace("/auth/login");
+        }
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -150,8 +156,7 @@
                             class="hidden absolute right-0 mt-2 w-44 bg-white border border-slate-100 rounded-lg shadow-lg py-1 z-50">
                             <a href="/profile" class="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">My
                                 Profile</a>
-                            <a href="/logout"
-                                class="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">Logout</a>
+                            <a href="#" id="logout-btn" class="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">Logout</a>
                         </div>
                     </div>
                 </div>
