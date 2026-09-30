@@ -19,4 +19,12 @@ class Course(Base):
 
     __table_args__ = (UniqueConstraint("owner_id", "title", name="uq_course_owner_title"),)
 
+    @property
+    def task_count(self):
+        return len(self.tasks)
+
+    @property
+    def note_count(self):
+        return len(self.notes)    
+
     
