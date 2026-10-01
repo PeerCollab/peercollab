@@ -27,4 +27,11 @@ class Course(Base):
     def note_count(self):
         return len(self.notes)    
 
+    @property
+    def progress(self):
+        if not self.tasks:
+            return 0
+        completed_tasks = sum(task.status == "Done" for task in self.tasks)
+        return round(completed_tasks / len(self.tasks) * 100)
+
     
