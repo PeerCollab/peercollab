@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Create Project - PeerCollab{% endblock %}
+{% block content %}
+<div class="max-w-xl">
+  <h1 class="text-2xl font-bold text-slate-900">Create Project</h1>
+  <p class="mt-1 text-slate-500">Start a new Solo or Group project.</p>
+
+  <form id="create-project-form" class="mt-6 space-y-4">
+    <div>
+      <label for="name" class="block text-sm font-medium text-slate-700">Project name</label>
+      <input id="name" name="name" type="text" required maxlength="100"
+        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+    </div>
+
+    <div>
+      <label for="description" class="block text-sm font-medium text-slate-700">Description</label>
+      <textarea id="description" name="description" rows="4"
+        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+    </div>
+
+    <div>
+      <label for="type" class="block text-sm font-medium text-slate-700">Project type</label>
+      <select id="type" name="type" required
+        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <option value="Solo">Solo</option>
+        <option value="Group">Group</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="deadline" class="block text-sm font-medium text-slate-700">Deadline (optional)</label>
+      <input id="deadline" name="deadline" type="date"
+        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+    </div>
+
+    <p id="form-error" class="hidden text-sm text-red-600"></p>
+
+    <button type="submit"
+      class="rounded-lg bg-indigo-600 px-5 py-2 font-medium text-white hover:bg-indigo-700">
+      Create Project
+    </button>
+  </form>
+</div>
+{% endblock %}
