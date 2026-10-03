@@ -8,6 +8,7 @@ from fastapi.templating import Jinja2Templates
 
 from app.database import get_db
 from app.models.user import User
+from app.models.course import Course
 from app.schemas.user import UserCreate, UserOut, Token
 from app.utils.security import hash_password, verify_password, create_access_token
 from app.utils.dependencies import get_current_user
@@ -38,6 +39,14 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)):
     db.add(user)
     db.commit()
     db.refresh(user)
+
+    db.add(Course(
+        owner_id=user.id,
+        title="General",
+        description="A shared space for tasks and notes that do not belong to one course.",
+        is_general=True,
+    ))
+    db.commit()
     return user
 
 @router.post("/login", response_model=Token)

@@ -102,7 +102,7 @@ async function saveContent(event) {
 }
 
 // Load all course data before refreshing each section of the page.
-async function loadContent() { [state.course, state.tasks, state.notes] = await Promise.all([api(`/courses/${courseId}`), api(`/courses/${courseId}/tasks/`), api(`/courses/${courseId}/notes/`)]); el("course-title").textContent = state.course.title; el("breadcrumb-course").textContent = state.course.title; el("course-description").textContent = state.course.description || "A focused space for everything you are learning in this course."; updateSummary(); renderOverview(); renderTasks(); renderNotes(); }
+async function loadContent() { [state.course, state.tasks, state.notes] = await Promise.all([api(`/courses/${courseId}`), api(`/courses/${courseId}/tasks/`), api(`/courses/${courseId}/notes/`)]); el("course-title").textContent = state.course.title; el("breadcrumb-course").textContent = state.course.title; el("course-description").textContent = state.course.description || "A focused space for everything you are learning in this course."; el("course-settings-link").classList.toggle("hidden", state.course.is_general); updateSummary(); renderOverview(); renderTasks(); renderNotes(); }
 
 // Confirm and delete a task or note, then reload the course data.
 async function removeContent(type, id, title) { if (!await askConfirmation(`Delete ${type}?`, `Delete "${title || `this ${type}`}"? This action cannot be undone.`)) return; try { await api(`/courses/${courseId}/${type}s/${id}`, { method: "DELETE" }); await loadContent(); showToast(`${type === "task" ? "Task" : "Note"} deleted successfully.`); } catch (error) { showToast(`Unable to delete ${type}. ${error.message}`, "error"); } }

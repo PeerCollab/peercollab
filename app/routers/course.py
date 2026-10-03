@@ -14,6 +14,41 @@ from sqlalchemy import select
 router = APIRouter(prefix="/courses", tags=["Courses"])
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
+GENERAL_COURSE_TITLE = "General"
+
+
+def ensure_general_course(current_user: User, db: Session) -> Course:
+    """Return the user's protected general course, creating it when needed."""
+
+    course = db.execute(
+        select(Course).where(
+            Course.owner_id == current_user.id,
+            Course.is_general.is_(True),
+        )
+    ).scalar_one_or_none()
+    if course is not None:
+        return course
+
+    course = db.execute(
+        select(Course).where(
+            Course.owner_id == current_user.id,
+            Course.title == GENERAL_COURSE_TITLE,
+        )
+    ).scalar_one_or_none()
+    if course is None:
+        course = Course(
+            owner_id=current_user.id,
+            title=GENERAL_COURSE_TITLE,
+            description="A shared space for tasks and notes that do not belong to one course.",
+            is_general=True,
+        )
+        db.add(course)
+    else:
+        course.is_general = True
+
+    db.commit()
+    db.refresh(course)
+    return course
 
 @router.get("", response_class=HTMLResponse, include_in_schema=False)
 def courses_page(request: Request) -> Response:
@@ -80,6 +115,9 @@ def create_course(
 ) -> Course:
     """Create a course owned by the authenticated user."""
 
+    if data.title.strip().casefold() == GENERAL_COURSE_TITLE.casefold():
+        raise HTTPException(status_code=409, detail="The General course is reserved")
+
     course = Course(**data.model_dump(), owner_id=current_user.id)
     db.add(course)
     try:
@@ -100,6 +138,7 @@ def list_courses(
 ) -> list[Course]:
     """Return the user's courses with the newest courses first."""
 
+    ensure_general_course(current_user, db)
     my_courses = db.execute(select(Course).where(Course.owner_id == current_user.id).order_by(Course.created_at.desc())).scalars().all()
     
     return my_courses  
@@ -132,6 +171,10 @@ def update_course(
     course = get_course_or_404(course_id, db)
     if course.owner_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized to update this course")
+    if course.is_general:
+        raise HTTPException(status_code=403, detail="The General course cannot be edited")
+    if update_data.title and update_data.title.strip().casefold() == GENERAL_COURSE_TITLE.casefold():
+        raise HTTPException(status_code=409, detail="The General course is reserved")
     
     data = update_data.model_dump(exclude_unset=True)
     for key, value in data.items():
@@ -159,6 +202,8 @@ def delete_course(
     course = get_course_or_404(course_id, db)
     if course.owner_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized to delete this course")
+    if course.is_general:
+        raise HTTPException(status_code=403, detail="The General course cannot be deleted")
     
     db.delete(course)
     db.commit()
