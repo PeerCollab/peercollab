@@ -5,25 +5,10 @@ from app.models.course import Course
 from app.models.user import User
 from app.models.course_task import Task
 from app.schemas.course_task import TaskResponse, TaskCreate, TaskUpdate
-from app.utils.dependencies import get_current_user
+from app.utils.dependencies import get_current_user, get_owned_course
 from sqlalchemy import select
 
 router = APIRouter(prefix="/courses/{course_id}/tasks", tags=["Course Tasks"])
-
-def get_owned_course(
-    course_id: int,
-    current_user: User,
-    db: Session
-) -> Course:
-    """Fetch a course only when it belongs to the authenticated user."""
-    
-    course = db.execute(select(Course).where(Course.id == course_id, Course.owner_id == current_user.id)).scalars().first()
-
-    if course is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course not found")
-
-    return course
-
 
 @router.post("/", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
 def create_task(
