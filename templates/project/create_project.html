@@ -42,3 +42,54 @@
   </form>
 </div>
 {% endblock %}
+{% block scripts %}
+<script>
+  const form = document.getElementById("create-project-form");
+  const msg = document.getElementById("form-error");
+
+  function showMessage(text, isError) {
+    msg.textContent = text;
+    msg.className = "text-sm " + (isError ? "text-red-600" : "text-green-600");
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const payload = {
+      name: document.getElementById("name").value.trim(),
+      description: document.getElementById("description").value.trim() || null,
+      type: document.getElementById("type").value,
+      deadline: document.getElementById("deadline").value || null,
+    };
+
+    try {
+      const res = await fetch("/api/projects", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + localStorage.getItem("access_token"),
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.status === 401) {
+        window.location.replace("/auth/login");
+        return;
+      }
+
+      const data = await res.json();
+      if (!res.ok) {
+        const detail = Array.isArray(data.detail) ? data.detail[0].msg : data.detail;
+        showMessage(detail || "Something went wrong.", true);
+        return;
+      }
+
+      let text = "Project created!";
+      if (data.invite_code) text += " Invite code: " + data.invite_code;
+      showMessage(text, false);
+      form.reset();
+    } catch (err) {
+      showMessage("Could not reach the server.", true);
+    }
+  });
+</script>
+{% endblock %}
