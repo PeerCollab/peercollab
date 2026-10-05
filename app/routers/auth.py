@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError
 from pathlib import Path
 from fastapi import Request
 from fastapi.responses import HTMLResponse
@@ -8,6 +9,7 @@ from fastapi.templating import Jinja2Templates
 
 from app.database import get_db
 from app.models.user import User
+from app.models.course import Course
 from app.schemas.user import UserCreate, UserOut, Token
 from app.utils.security import hash_password, verify_password, create_access_token
 from app.utils.dependencies import get_current_user
@@ -35,9 +37,27 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)):
         email=user_in.email,
         password_hash=hash_password(user_in.password),
     )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
+    try:
+        db.add(user)
+        # Assign the user ID without committing so the course remains in this transaction.
+        db.flush()
+
+        db.add(Course(
+            owner_id=user.id,
+            title="General",
+            description="A shared space for tasks and notes that do not belong to one course.",
+            is_general=True,
+        ))
+        db.commit()
+        db.refresh(user)
+    except SQLAlchemyError:
+        # Roll back both inserts if any database operation fails.
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Registration failed. Please try again.",
+        )
+
     return user
 
 @router.post("/login", response_model=Token)

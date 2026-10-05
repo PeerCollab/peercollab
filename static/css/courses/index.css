@@ -1,0 +1,27 @@
+#course-toast {
+    animation: course-toast-in 180ms ease-out;
+}
+
+#course-toast-content.toast-success {
+    border-color: #86efac;
+    background: #f0fdf4;
+    color: #166534;
+}
+
+#course-toast-content.toast-error {
+    border-color: #fda4af;
+    background: #fff1f2;
+    color: #be123c;
+}
+
+@keyframes course-toast-in {
+    from {
+        opacity: 0;
+        transform: translateY(0.5rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

@@ -1,0 +1,327 @@
+{% extends "base.html" %}
+
+{% block title %}Course workspace | PeerCollab{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="/static/css/courses/detail.css">{% endblock %}
+
+{% block pages %}
+<!-- Breadcrumb is populated with the loaded course name by course_detail.js. -->
+<div class="flex items-center gap-2 text-sm">
+    <a href="/courses" class="text-slate-400 transition-colors hover:text-brand-600">Courses</a>
+    <i data-lucide="chevron-right" class="h-4 w-4 text-slate-300"></i>
+    <span id="breadcrumb-course" class="font-medium text-slate-700">Course workspace</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Course detail state and interactions are controlled by course_detail.js. -->
+<div id="course-module" data-course-id="{{ course_id }}" class="mx-auto max-w-7xl">
+    <!-- Initial state while course, task, and note data is loading. -->
+    <div id="module-loading" class="flex min-h-[420px] items-center justify-center">
+        <div class="flex items-center gap-3 text-sm text-slate-500">
+            <span class="h-5 w-5 animate-spin rounded-full border-2 border-brand-200 border-t-brand-600"></span>
+            Loading your course workspace...
+        </div>
+    </div>
+
+    <!-- Error state shown when the course workspace cannot be loaded. -->
+    <div id="module-error" class="hidden rounded-xl border border-red-200 bg-red-50 p-6 text-red-700">
+        <div class="flex items-start gap-3">
+            <i data-lucide="triangle-alert" class="mt-0.5 h-5 w-5 shrink-0"></i>
+            <div>
+                <h1 class="font-semibold">This course could not be loaded</h1>
+                <p id="module-error-message" class="mt-1 text-sm text-red-600">Please refresh and try again.</p>
+                <a href="/courses"
+                    class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-red-700 hover:text-red-800">
+                    <i data-lucide="arrow-left" class="h-4 w-4"></i> Back to courses
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loaded workspace content, including tabs and data panels. -->
+    <div id="module-content" class="hidden">
+        <div>
+            <div class="min-w-0">
+                <a href="/courses"
+                    class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-brand-600 hover:text-brand-700">
+                    <i data-lucide="arrow-left" class="h-3.5 w-3.5"></i> All courses
+                </a>
+                <div class="relative mt-3 grid grid-cols-1 items-start gap-5 sm:grid-cols-[minmax(0,1fr)_auto]">
+                    <div class="flex min-w-0 items-start gap-4">
+                        <span
+                            class="hidden h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600 sm:flex">
+                            <i data-lucide="book-open" class="h-6 w-6"></i>
+                        </span>
+                        <div class="min-w-0">
+                            <h1 id="course-title" class="truncate text-3xl font-semibold tracking-tight text-slate-900">
+                                Course</h1>
+                            <p id="course-description" class="mt-1 max-w-2xl text-sm leading-6 text-slate-500"></p>
+                        </div>
+                    </div>
+                    <a id="course-settings-link" href="/courses/{{ course_id }}/edit"
+                        class="inline-flex w-fit shrink-0 self-start items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:border-brand-200 hover:bg-brand-50 hover:text-brand-700 sm:justify-self-end">
+                        <i data-lucide="settings-2" class="h-4 w-4"></i> Course settings
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs switch between the overview, tasks, and notes panels. -->
+        <div class="mt-8 border-b border-slate-200">
+            <nav class="flex gap-7 overflow-x-auto" aria-label="Course sections">
+                <button type="button" data-tab="overview" aria-selected="true"
+                    class="tab-button active-tab inline-flex items-center gap-2 border-b-2 border-brand-600 px-1 pb-3 text-sm font-semibold text-brand-600"><i
+                        data-lucide="layout-dashboard" class="h-4 w-4"></i> Overview</button>
+                <button type="button" data-tab="tasks" aria-selected="false"
+                    class="tab-button inline-flex items-center gap-2 border-b-2 border-transparent px-1 pb-3 text-sm font-semibold text-slate-400 hover:text-slate-700"><i
+                        data-lucide="check-square" class="h-4 w-4"></i> Tasks <span id="task-tab-count"
+                        class="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">0</span></button>
+                <button type="button" data-tab="notes" aria-selected="false"
+                    class="tab-button inline-flex items-center gap-2 border-b-2 border-transparent px-1 pb-3 text-sm font-semibold text-slate-400 hover:text-slate-700"><i
+                        data-lucide="file-text" class="h-4 w-4"></i> Notes <span id="note-tab-count"
+                        class="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">0</span></button>
+            </nav>
+        </div>
+
+        <!-- Overview summarizes counts, progress, and recent course activity. -->
+        <section id="overview-panel" data-panel="overview" class="tab-panel py-7">
+            <div class="grid gap-4 sm:grid-cols-3">
+                <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="flex items-center justify-between"><span
+                            class="text-sm font-medium text-slate-500">Total notes</span><i data-lucide="notebook-pen"
+                            class="h-4 w-4 text-sky-600"></i></div><strong id="note-count"
+                        class="mt-3 block text-2xl font-semibold text-slate-900">0</strong>
+                    <p class="mt-1 text-xs text-slate-400">Ideas captured in this course</p>
+                </div>
+                <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="flex items-center justify-between"><span
+                            class="text-sm font-medium text-slate-500">Total tasks</span><i data-lucide="list-checks"
+                            class="h-4 w-4 text-brand-600"></i></div><strong id="task-count"
+                        class="mt-3 block text-2xl font-semibold text-slate-900">0</strong>
+                    <p class="mt-1 text-xs text-slate-400">Everything on your course list</p>
+                </div>
+                <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="flex items-center justify-between"><span class="text-sm font-medium text-slate-500">Due
+                            this week</span><i data-lucide="calendar-clock" class="h-4 w-4 text-amber-500"></i></div>
+                    <strong id="due-week-count" class="mt-3 block text-2xl font-semibold text-slate-900">0</strong>
+                    <p class="mt-1 text-xs text-slate-400">Upcoming deadlines</p>
+                </div>
+            </div>
+            <div class="mt-6 grid gap-6 lg:grid-cols-2">
+                <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-[0.14em] text-brand-600">Progress</p>
+                            <h2 class="mt-1 text-lg font-semibold text-slate-900">Course progress</h2>
+                        </div><span id="course-progress" class="text-2xl font-semibold text-brand-600">0%</span>
+                    </div>
+                    <div class="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
+                        <div id="progress-bar" class="h-full rounded-full bg-brand-600 transition-all duration-500"
+                            style="width: 0%"></div>
+                    </div>
+                    <p id="completed-tasks" class="mt-2 text-xs text-slate-400">0 of 0 tasks done</p>
+                    <div class="mt-8 flex flex-col items-center gap-6 sm:flex-row sm:justify-center">
+                        <div id="task-donut" class="donut-chart"><span id="donut-total">0</span></div>
+                        <div id="task-legend" class="grid gap-3 text-sm"></div>
+                    </div>
+                </div>
+                <div class="rounded-xl bg-gradient-to-br from-brand-600 to-brand-700 p-6 text-white shadow-sm"><i
+                        data-lucide="sparkles" class="h-5 w-5 text-brand-100"></i>
+                    <h2 class="mt-5 text-lg font-semibold">Make this course yours</h2>
+                    <p class="mt-2 text-sm leading-6 text-brand-100">Capture the next deadline or write down a useful
+                        idea while it is fresh.</p>
+                    <div class="mt-6 flex flex-wrap gap-2"><button type="button" data-open-modal="task"
+                            class="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-50"><i
+                                data-lucide="plus" class="h-4 w-4"></i> Add task</button><button type="button"
+                            data-open-modal="note"
+                            class="inline-flex items-center gap-2 rounded-lg border border-brand-300 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-700"><i
+                                data-lucide="pen-line" class="h-4 w-4"></i> Add note</button></div>
+                </div>
+            </div>
+            <section class="mt-8">
+                <div
+                    class="flex flex-col gap-2 border-b border-slate-200 pb-4 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-brand-600">Recent activity</p>
+                        <h2 class="mt-1 text-xl font-semibold text-slate-900">Keep your course moving</h2>
+                    </div>
+                    <p class="text-sm text-slate-400">Your latest tasks and notes in one place</p>
+                </div>
+                <div class="grid gap-8 pt-6 lg:grid-cols-2">
+                    <div class="min-w-0">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2"><span
+                                    class="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-50 text-brand-600"><i
+                                        data-lucide="list-checks" class="h-4 w-4"></i></span>
+                                <h3 class="font-semibold text-slate-800">Latest tasks</h3>
+                            </div><button type="button" data-open-tab="tasks"
+                                class="inline-flex items-center gap-1 text-sm font-semibold text-brand-600 hover:text-brand-700">View
+                                all tasks <i data-lucide="arrow-up-right" class="h-3.5 w-3.5"></i></button>
+                        </div>
+                        <div id="latest-tasks" class="mt-4 divide-y divide-slate-200"></div>
+                    </div>
+                    <div class="min-w-0 lg:border-l lg:border-slate-200 lg:pl-8">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2"><span
+                                    class="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-50 text-sky-600"><i
+                                        data-lucide="notebook-pen" class="h-4 w-4"></i></span>
+                                <h3 class="font-semibold text-slate-800">Latest notes</h3>
+                            </div><button type="button" data-open-tab="notes"
+                                class="inline-flex items-center gap-1 text-sm font-semibold text-brand-600 hover:text-brand-700">View
+                                all notes <i data-lucide="arrow-up-right" class="h-3.5 w-3.5"></i></button>
+                        </div>
+                        <div id="latest-notes" class="mt-4"></div>
+                    </div>
+                </div>
+            </section>
+    </div>
+    </section>
+
+    <!-- Tasks panel provides search, filtering, sorting, and task management. -->
+    <section id="tasks-panel" data-panel="tasks" class="tab-panel hidden py-7">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h2 class="text-xl font-semibold text-slate-900">Tasks</h2>
+                <p class="mt-1 text-sm text-slate-500">Plan the work and keep deadlines in sight.</p>
+            </div><button type="button" data-open-modal="task"
+                class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-700"><i
+                    data-lucide="plus" class="h-4 w-4"></i> Add task</button>
+        </div>
+        <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="relative w-full max-w-md"><i data-lucide="search"
+                    class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"></i><input id="task-search"
+                    type="search" placeholder="Search tasks" aria-label="Search tasks"
+                    class="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-9 pr-4 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100">
+            </div>
+            <div class="flex flex-wrap gap-3 sm:justify-end"><select id="task-filter"
+                    aria-label="Filter tasks by status"
+                    class="rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-600 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100">
+                    <option value="all">All statuses</option>
+                    <option value="To Do">To do</option>
+                    <option value="In Progress">In progress</option>
+                    <option value="Done">Done</option>
+                </select><select id="task-priority-filter" aria-label="Filter tasks by priority"
+                    class="rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-600 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100">
+                    <option value="all">All priorities</option>
+                    <option value="High">High priority</option>
+                    <option value="Medium">Medium priority</option>
+                    <option value="Low">Low priority</option>
+                </select><select id="task-sort" aria-label="Sort tasks"
+                    class="rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-600 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100">
+                    <option value="recent">Recently added</option>
+                    <option value="due">Due date</option>
+                </select></div>
+        </div>
+        <div id="task-list" class="mt-5 space-y-3"></div>
+    </section>
+
+    <!-- Notes panel provides search, sorting, and note management. -->
+    <section id="notes-panel" data-panel="notes" class="tab-panel hidden py-7">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h2 class="text-xl font-semibold text-slate-900">Notes</h2>
+                <p class="mt-1 text-sm text-slate-500">A quiet place for concepts, references, and reminders.</p>
+            </div><button type="button" data-open-modal="note"
+                class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-700"><i
+                    data-lucide="plus" class="h-4 w-4"></i> Add note</button>
+        </div>
+        <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="relative w-full max-w-md"><i data-lucide="search"
+                    class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"></i><input id="note-search"
+                    type="search" placeholder="Search notes" aria-label="Search notes"
+                    class="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-9 pr-4 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100">
+            </div>
+            <div class="flex flex-wrap gap-3 sm:justify-end"><select id="note-sort" aria-label="Sort notes"
+                    class="rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-600 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100">
+                    <option value="recent">Recently added</option>
+                    <option value="title">Title</option>
+                </select></div>
+        </div>
+        <div id="note-list" class="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3"></div>
+    </section>
+</div>
+</div>
+
+<!-- Toast messages provide feedback for course, task, and note actions. -->
+<div id="course-toast"
+    class="pointer-events-none fixed bottom-6 right-6 z-[60] hidden w-[min( calc(100vw-3rem), 380px)]" role="status"
+    aria-live="polite">
+    <div id="course-toast-content"
+        class="pointer-events-auto flex items-start gap-3 rounded-xl border px-4 py-3 shadow-lg">
+        <i id="course-toast-icon" data-lucide="circle-check" class="mt-0.5 h-5 w-5 shrink-0"></i>
+        <p id="course-toast-message" class="text-sm font-medium"></p>
+        <button type="button" id="course-toast-close"
+            class="ml-auto shrink-0 rounded-md p-0.5 opacity-70 hover:opacity-100" aria-label="Dismiss message"><i
+                data-lucide="x" class="h-4 w-4"></i></button>
+    </div>
+</div>
+
+<!-- Shared confirmation dialog for deleting tasks, notes, or other course content. -->
+<div id="delete-confirmation" class="fixed inset-0 z-[70] hidden items-center justify-center bg-slate-950/40 px-4"
+    role="dialog" aria-modal="true" aria-labelledby="delete-confirmation-title">
+    <div class="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
+        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-red-50 text-red-600"><i
+                data-lucide="trash-2" class="h-5 w-5"></i></div>
+        <h2 id="delete-confirmation-title" class="mt-4 text-lg font-semibold text-slate-900">Delete item?</h2>
+        <p id="delete-confirmation-message" class="mt-2 text-sm leading-6 text-slate-500">This action cannot be undone.
+        </p>
+        <div class="mt-6 flex justify-end gap-3"><button type="button" id="delete-cancel"
+                class="rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100">Cancel</button><button
+                type="button" id="delete-confirm"
+                class="rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700">Yes,
+                delete</button></div>
+    </div>
+</div>
+
+<!-- Shared modal switches its fields between task and note create/edit modes. -->
+<div id="content-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/40 px-4 py-6"
+    role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl">
+        <div class="flex items-start justify-between gap-4">
+            <div>
+                <p id="modal-kicker" class="text-xs font-semibold uppercase tracking-[0.14em] text-brand-600">Course
+                    workspace</p>
+                <h2 id="modal-title" class="mt-1 text-xl font-semibold text-slate-900">Add task</h2>
+            </div><button type="button" data-close-modal
+                class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                aria-label="Close dialog"><i data-lucide="x" class="h-5 w-5"></i></button>
+        </div>
+        <form id="content-form" class="mt-6 space-y-4"><input type="hidden" id="content-id"><input type="hidden"
+                id="content-type"><label class="block"><span
+                    class="text-sm font-medium text-slate-700">Title</span><input id="content-title" required
+                    maxlength="100"
+                    class="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"></label><label
+                id="task-due-field" class="block"><span class="text-sm font-medium text-slate-700">Due date</span><input
+                    id="task-due-date" type="date"
+                    class="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"></label>
+            <div id="task-options" class="grid gap-4 sm:grid-cols-2"><label class="block"><span
+                        class="text-sm font-medium text-slate-700">Priority</span><select id="task-priority"
+                        class="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm">
+                        <option>Low</option>
+                        <option>Medium</option>
+                        <option>High</option>
+                    </select></label><label class="block"><span
+                        class="text-sm font-medium text-slate-700">Status</span><select id="task-status"
+                        class="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm">
+                        <option>To Do</option>
+                        <option>In Progress</option>
+                        <option>Done</option>
+                    </select></label></div><label id="note-content-field" class="hidden block"><span
+                    class="text-sm font-medium text-slate-700">Note</span><textarea id="note-content" rows="6"
+                    placeholder="Write what you want to remember..."
+                    class="mt-1.5 w-full resize-y rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"></textarea></label>
+            <p id="form-error" class="hidden text-sm text-red-600"></p>
+            <div class="flex justify-end gap-3 pt-2"><button type="button" data-close-modal
+                    class="rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100">Cancel</button><button
+                    id="form-submit" type="submit"
+                    class="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Page-specific loading, tab, filter, modal, and CRUD behavior. -->
+<script src="/static/js/course_detail.js?v=1"></script>{% endblock %}
