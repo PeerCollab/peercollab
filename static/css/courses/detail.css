@@ -1,0 +1,123 @@
+.tab-button {
+  border-bottom-color: transparent;
+  transition: color 150ms ease, border-color 150ms ease;
+}
+
+.tab-button.active-tab {
+  border-bottom-color: #635bff !important;
+  color: #635bff !important;
+}
+
+.tab-button:not(.active-tab) {
+  border-bottom-color: transparent !important;
+}
+
+#content-modal {
+  backdrop-filter: blur(3px);
+}
+
+#course-toast {
+  animation: course-toast-in 180ms ease-out;
+}
+
+#course-toast-content.toast-success {
+  border-color: #86efac;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+#course-toast-content.toast-error {
+  border-color: #fda4af;
+  background: #fff1f2;
+  color: #be123c;
+}
+
+@keyframes course-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.donut-chart {
+  align-items: center;
+  background: conic-gradient(#635bff 0deg, #e2e8f0 0deg);
+  border-radius: 9999px;
+  display: flex;
+  height: 136px;
+  justify-content: center;
+  position: relative;
+  width: 136px;
+}
+
+.donut-chart::after {
+  background: white;
+  border-radius: 9999px;
+  content: "";
+  height: 92px;
+  position: absolute;
+  width: 92px;
+}
+
+.donut-chart span {
+  color: #0f172a;
+  font-size: 1.5rem;
+  font-weight: 700;
+  position: relative;
+  z-index: 1;
+}
+
+.overview-item-title,
+.overview-item-copy {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+}
+
+.overview-item-title {
+  -webkit-line-clamp: 1;
+}
+
+.overview-item-copy {
+  -webkit-line-clamp: 2;
+  overflow-wrap: anywhere;
+}
+
+#latest-tasks,
+#latest-notes {
+  min-width: 0;
+}
+
+#latest-tasks>div,
+#latest-notes>div {
+  min-width: 0;
+}
+
+#latest-tasks>div {
+  border-bottom: 1px solid #f1f5f9;
+  padding: 0.7rem 0;
+}
+
+#latest-tasks>div:last-child {
+  border-bottom: 0;
+}
+
+#latest-notes>div {
+  border-left: 3px solid #e0e7ff;
+  padding: 0.7rem 0 0.7rem 0.9rem;
+}
+
+#latest-notes>div:last-child {
+  border-left-color: #c7d2fe;
+}
+
+@media (max-width: 640px) {
+  #course-title {
+    font-size: 1.75rem;
+  }
+}

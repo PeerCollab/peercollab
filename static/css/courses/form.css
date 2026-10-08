@@ -1,0 +1,38 @@
+#course-form input:invalid:not(:placeholder-shown),
+#course-form textarea:invalid:not(:placeholder-shown) {
+	border-color: #fca5a5;
+}
+
+#course-form-toast {
+	animation: course-form-toast-in 180ms ease-out;
+}
+
+#course-form-toast-content.toast-success {
+	border-color: #86efac;
+	background: #f0fdf4;
+	color: #166534;
+}
+
+#course-form-toast-content.toast-error {
+	border-color: #fda4af;
+	background: #fff1f2;
+	color: #be123c;
+}
+
+#course-form-toast-content.toast-info {
+	border-color: #93c5fd;
+	background: #eff6ff;
+	color: #1d4ed8;
+}
+
+@keyframes course-form-toast-in {
+	from {
+		opacity: 0;
+		transform: translateY(0.5rem);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
