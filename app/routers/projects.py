@@ -42,7 +42,7 @@ def projects_page(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="project/projects.html",
-        context={"active_page": "projects", "page_title": "My Projects"},
+        context={"active_page": "projects", "page_title": "Projects"},
     )
 
 
@@ -110,9 +110,16 @@ def update_project(
     project = get_owned_project(project_id, db, current_user)
     data = project_in.model_dump(exclude_unset=True)
     for key, value in data.items():
-        if value is None and key in ("name", "status"):
+        if value is None and key in ("name", "status", "type"):
             continue
         setattr(project, key, value)
+
+    # Keep the invite code in step with the project type
+    if project.type == "Group" and not project.invite_code:
+        project.invite_code = generate_invite_code(db)
+    if project.type == "Solo":
+        project.invite_code = None
+
     db.commit()
     db.refresh(project)
     return project

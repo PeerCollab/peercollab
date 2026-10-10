@@ -11,6 +11,14 @@ class ProjectCreate(BaseModel):
     deadline: Optional[date] = None
 
 
+class ProjectUpdate(BaseModel):
+    name: Optional[str] = Field(default=None, min_length=1, max_length=100)
+    description: Optional[str] = None
+    type: Optional[Literal["Solo", "Group"]] = None
+    status: Optional[Literal["Ongoing", "Completed"]] = None
+    deadline: Optional[date] = None
+
+
 class ProjectOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -23,10 +31,3 @@ class ProjectOut(BaseModel):
     owner_id: int
     deadline: Optional[date] = None
     created_at: Optional[datetime] = None
-
-
-class ProjectUpdate(BaseModel):
-    name: Optional[str] = Field(default=None, min_length=1, max_length=100)
-    description: Optional[str] = None
-    status: Optional[Literal["Ongoing", "Completed"]] = None
-    deadline: Optional[date] = None
