@@ -1,202 +1,349 @@
 {% extends "base.html" %}
-
-{% block title %}{{ page_title }} | PeerCollab{% endblock %}
-
+{% block title %}Projects - PeerCollab{% endblock %}
 {% block content %}
-<section class="mx-auto max-w-7xl">
-    <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-600">Your collaborative workspace</p>
-            <h1 class="mt-1 text-2xl font-semibold tracking-tight text-slate-900">Projects</h1>
-            <p class="mt-2 text-sm text-slate-500">Plan your work, track progress, and collaborate with your peers.</p>
-        </div>
-        <a href="/projects/new"
-            class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-700">
-            <i data-lucide="plus" class="h-4 w-4"></i>
-            Create project
-        </a>
-    </div>
+{% set field = "mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100" %}
+{% set solid = "inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-brand-700 hover:shadow-lg" %}
+{% set outline = "inline-flex items-center gap-2 rounded-xl border border-brand-600 bg-white px-5 py-3 text-sm font-semibold text-brand-600 transition duration-200 hover:-translate-y-0.5 hover:bg-brand-50 hover:shadow-md" %}
 
-    <div class="mt-5 flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:items-center">
-        <div class="relative w-full max-w-md">
-            <i data-lucide="search" class="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"></i>
-            <input id="project-search" type="search" aria-label="Search projects" placeholder="Search projects..."
-                class="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-700 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100">
-        </div>
-        <label class="flex items-center gap-2 text-sm text-slate-500 sm:ml-auto">
-            <span>Sort by</span>
-            <select id="project-sort" aria-label="Sort projects"
-                class="rounded-lg border border-slate-200 bg-white py-2.5 pl-3 pr-8 text-sm font-medium text-slate-700 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100">
-                <option value="recent">Recently added</option>
-                <option value="name">Name: A-Z</option>
-                <option value="deadline">Deadline</option>
-            </select>
-        </label>
-    </div>
+<div class="flex flex-wrap items-start justify-between gap-4">
+  <div>
+    <p class="text-xs font-semibold uppercase tracking-widest text-brand-600">Your collaborative workspace</p>
+    <h1 class="mt-1 text-3xl font-bold text-slate-900">Projects</h1>
+    <p class="mt-1 text-slate-500">Plan your work, track progress, and collaborate with your peers.</p>
+  </div>
+  <div class="flex gap-3">
+    <button id="join-btn" type="button" class="{{ outline }}"><i data-lucide="users" class="h-4 w-4"></i> Join a project</button>
+    <a href="/projects/new" class="{{ solid }}"><i data-lucide="plus" class="h-4 w-4"></i> Create project</a>
+  </div>
+</div>
 
-    <p id="project-status" class="mt-5 text-sm text-slate-500" role="status" aria-live="polite">
-        Loading your projects...
-    </p>
-    <div id="project-grid" class="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-        <a href="/projects/new"
-            class="flex min-h-[220px] h-full flex-col items-center justify-center rounded-xl border-2 border-dashed border-brand-200 bg-brand-50 p-5 text-center transition-colors hover:border-brand-400 hover:bg-brand-100"
-            aria-label="Create a new project">
-            <span
-                class="flex h-12 w-12 items-center justify-center rounded-full border-2 border-brand-500 bg-brand-100 text-brand-600 shadow-sm transition-all duration-200 hover:bg-brand-500 hover:text-white hover:shadow-md">
-                <i data-lucide="plus" class="h-6 w-6"></i>
-            </span>
-            <span class="mt-4 text-lg font-semibold text-slate-900">Create a new project</span>
-            <span class="mt-2 max-w-[220px] text-sm leading-5 text-slate-700">
-                Start a solo project or invite your peers to collaborate.
-            </span>
-            <span class="mt-4 flex items-center gap-1 text-sm font-semibold text-brand-700">
-                <i data-lucide="plus" class="h-4 w-4"></i>
-                Create project
-            </span>
-        </a>
+<hr class="my-6 border-slate-100">
+
+<div id="flash" class="mb-4 hidden rounded-xl bg-green-50 px-4 py-3 text-sm font-medium text-green-700"></div>
+
+<div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+  <div class="relative w-full max-w-md">
+    <i data-lucide="search" class="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"></i>
+    <input id="search-input" type="text" placeholder="Search projects..."
+      class="w-full rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100">
+  </div>
+  <div class="flex items-center gap-3 text-sm text-slate-500">
+    <label for="sort-select">Sort by</label>
+    <select id="sort-select" class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100">
+      <option value="recent">Recently added</option>
+      <option value="name">Name (A-Z)</option>
+      <option value="deadline">Deadline (soonest)</option>
+    </select>
+  </div>
+</div>
+
+<p id="status-msg" class="mb-4 text-sm text-slate-500">Loading your projects...</p>
+<div id="project-grid" class="grid gap-6 md:grid-cols-2 xl:grid-cols-3"></div>
+
+<!-- EDIT WINDOW -->
+<div id="edit-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 p-4">
+  <form id="edit-form" class="w-full max-w-lg space-y-4 rounded-2xl bg-white p-6 shadow-xl">
+    <div class="flex items-center justify-between">
+      <h2 class="text-xl font-bold text-slate-900">Edit project</h2>
+      <button type="button" class="close-modal rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"><i data-lucide="x" class="h-4 w-4"></i></button>
     </div>
-</section>
+    <div>
+      <label for="edit-name" class="block text-sm font-medium text-slate-700">Project name</label>
+      <input id="edit-name" type="text" required maxlength="100" class="{{ field }}">
+    </div>
+    <div>
+      <label for="edit-description" class="block text-sm font-medium text-slate-700">Description</label>
+      <textarea id="edit-description" rows="3" class="{{ field }}"></textarea>
+    </div>
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label for="edit-type" class="block text-sm font-medium text-slate-700">Project type</label>
+        <select id="edit-type" class="{{ field }}">
+          <option value="Solo">Solo</option>
+          <option value="Group">Group</option>
+        </select>
+      </div>
+      <div>
+        <label for="edit-status" class="block text-sm font-medium text-slate-700">Status</label>
+        <select id="edit-status" class="{{ field }}">
+          <option value="Ongoing">Ongoing</option>
+          <option value="Completed">Completed</option>
+        </select>
+      </div>
+    </div>
+    <div>
+      <label for="edit-deadline" class="block text-sm font-medium text-slate-700">Deadline (optional)</label>
+      <input id="edit-deadline" type="date" class="{{ field }}">
+    </div>
+    <p id="edit-error" class="hidden text-sm text-red-600"></p>
+    <div class="flex justify-end gap-3 pt-2">
+      <button type="button" class="close-modal rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">Cancel</button>
+      <button type="submit" class="{{ solid }}">Save changes</button>
+    </div>
+  </form>
+</div>
+
+<!-- JOIN WINDOW -->
+<div id="join-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 p-4">
+  <form id="join-form" class="w-full max-w-md space-y-4 rounded-2xl bg-white p-6 shadow-xl">
+    <div class="flex items-center justify-between">
+      <h2 class="text-xl font-bold text-slate-900">Join a project</h2>
+      <button type="button" class="close-modal rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"><i data-lucide="x" class="h-4 w-4"></i></button>
+    </div>
+    <p class="text-sm text-slate-500">Enter the 8-character invite code your teammate shared with you.</p>
+    <input id="join-code" type="text" maxlength="8" required placeholder="e.g. AB12CD34"
+      class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-center font-mono text-lg uppercase tracking-widest focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100">
+    <p id="join-msg" class="hidden text-sm"></p>
+    <div class="flex justify-end gap-3 pt-2">
+      <button type="button" class="close-modal rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">Cancel</button>
+      <button type="submit" class="{{ solid }}">Join project</button>
+    </div>
+  </form>
+</div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-    const grid = document.getElementById("project-grid");
-    const statusMsg = document.getElementById("project-status");
-    const searchInput = document.getElementById("project-search");
-    const sortSelect = document.getElementById("project-sort");
-    const projects = [];
+  const grid = document.getElementById("project-grid");
+  const statusMsg = document.getElementById("status-msg");
+  const searchInput = document.getElementById("search-input");
+  const sortSelect = document.getElementById("sort-select");
+  const editModal = document.getElementById("edit-modal");
+  const editForm = document.getElementById("edit-form");
+  const editError = document.getElementById("edit-error");
+  const joinModal = document.getElementById("join-modal");
+  const joinForm = document.getElementById("join-form");
+  const joinMsg = document.getElementById("join-msg");
+  let allProjects = [];
 
-    function authHeaders() {
-        return {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer " + localStorage.getItem("access_token"),
-        };
-    }
+  function authHeaders() {
+    return {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + localStorage.getItem("access_token"),
+    };
+  }
 
-    function escapeHtml(text) {
-        const div = document.createElement("div");
-        div.textContent = text || "";
-        return div.innerHTML;
-    }
+  function escapeHtml(text) {
+    const div = document.createElement("div");
+    div.textContent = text || "";
+    return div.innerHTML;
+  }
 
-    function projectCard(project) {
-        const typeStyle = project.type === "Group"
-            ? "bg-brand-50 text-brand-700"
-            : "bg-slate-100 text-slate-600";
-        const statusStyle = project.status === "Completed" ? "text-green-600" : "text-amber-600";
-        const deadline = project.deadline ? `Due ${escapeHtml(project.deadline)}` : "No deadline";
-        const invite = project.invite_code
-            ? `<p class="mt-3 text-xs text-slate-500">Invite code: <span class="font-mono font-semibold text-slate-700">${escapeHtml(project.invite_code)}</span></p>`
-            : "";
+  function formatDate(value) {
+    const d = new Date(value + "T00:00:00");
+    return d.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+  }
 
-        return `
-            <article class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm" data-id="${project.id}">
-                <div class="flex items-start justify-between gap-3">
-                    <div class="min-w-0">
-                        <span class="rounded-full px-2.5 py-0.5 text-xs font-medium ${typeStyle}">${escapeHtml(project.type)}</span>
-                        <h2 class="mt-2 truncate text-lg font-semibold text-slate-900">${escapeHtml(project.name)}</h2>
-                    </div>
-                    <div class="flex shrink-0 gap-3 text-xs">
-                        <button type="button" class="rename-btn text-slate-400 hover:text-brand-600">Rename</button>
-                        <button type="button" class="delete-btn text-slate-400 hover:text-red-600">Delete</button>
-                    </div>
-                </div>
-                <p class="mt-2 text-sm text-slate-500">${escapeHtml(project.description) || "No description"}</p>
-                <div class="mt-4">
-                    <div class="flex justify-between text-xs text-slate-500"><span>Progress</span><span>0%</span></div>
-                    <div class="mt-1 h-2 rounded-full bg-slate-100">
-                        <div class="h-2 rounded-full bg-brand-600" style="width: 0%"></div>
-                    </div>
-                </div>
-                <div class="mt-3 flex items-center justify-between text-xs">
-                    <span class="font-medium ${statusStyle}">${escapeHtml(project.status)}</span>
-                    <span class="text-slate-400">${deadline}</span>
-                </div>
-                ${invite}
-            </article>`;
-    }
+  function openModal(modal) {
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
 
-    function renderProjects() {
-        const query = searchInput.value.trim().toLowerCase();
-        const visibleProjects = projects.filter((project) =>
-            `${project.name} ${project.description || ""} ${project.type} ${project.status}`
-                .toLowerCase()
-                .includes(query)
-        );
-        const sortBy = sortSelect.value;
-
-        if (sortBy === "name") {
-            visibleProjects.sort((a, b) => a.name.localeCompare(b.name));
-        } else if (sortBy === "deadline") {
-            visibleProjects.sort((a, b) => {
-                if (!a.deadline) return b.deadline ? 1 : 0;
-                if (!b.deadline) return -1;
-                return a.deadline.localeCompare(b.deadline);
-            });
-        }
-
-        grid.querySelectorAll("[data-id]").forEach((card) => card.remove());
-        grid.insertAdjacentHTML("afterbegin", visibleProjects.map(projectCard).join(""));
-
-        if (projects.length === 0) {
-            statusMsg.textContent = "You have no projects yet. Create one to get started.";
-        } else if (visibleProjects.length === 0) {
-            statusMsg.textContent = "No projects match your search.";
-        } else {
-            statusMsg.textContent = "";
-        }
-    }
-
-    async function loadProjects() {
-        try {
-            const response = await fetch("/api/projects", { headers: authHeaders() });
-            if (response.status === 401) {
-                window.location.replace("/auth/login");
-                return;
-            }
-            if (!response.ok) {
-                statusMsg.textContent = "Could not load your projects.";
-                return;
-            }
-
-            projects.splice(0, projects.length, ...await response.json());
-            renderProjects();
-        } catch (error) {
-            statusMsg.textContent = "Could not reach the server.";
-        }
-    }
-
-    searchInput.addEventListener("input", renderProjects);
-    sortSelect.addEventListener("change", renderProjects);
-
-    grid.addEventListener("click", async (event) => {
-        const button = event.target.closest("button");
-        const card = button && button.closest("[data-id]");
-        if (!card) return;
-        const id = card.dataset.id;
-
-        if (button.classList.contains("delete-btn")) {
-            if (!confirm("Delete this project? This cannot be undone.")) return;
-            const response = await fetch(`/api/projects/${id}`, {
-                method: "DELETE",
-                headers: authHeaders(),
-            });
-            if (response.status === 204) loadProjects();
-            else alert("Could not delete the project.");
-        } else if (button.classList.contains("rename-btn")) {
-            const currentName = card.querySelector("h2").textContent;
-            const name = prompt("New project name", currentName);
-            if (!name || !name.trim()) return;
-            const response = await fetch(`/api/projects/${id}`, {
-                method: "PATCH",
-                headers: authHeaders(),
-                body: JSON.stringify({ name: name.trim() }),
-            });
-            if (response.ok) loadProjects();
-            else alert("Could not rename the project.");
-        }
+  function closeModals() {
+    [editModal, joinModal].forEach((m) => {
+      m.classList.add("hidden");
+      m.classList.remove("flex");
     });
+  }
 
-    loadProjects();
+  function refreshIcons() {
+    if (window.lucide) lucide.createIcons();
+  }
+
+  function projectCard(p) {
+    const isGroup = p.type === "Group";
+    const typePill = isGroup ? "bg-brand-50 text-brand-600" : "bg-slate-100 text-slate-600";
+    const dot = p.status === "Completed" ? "bg-green-500" : "bg-amber-400";
+    const due = p.deadline ? "Due " + formatDate(p.deadline) : "No deadline";
+    const invite = isGroup && p.invite_code
+      ? `<p class="mt-3 text-xs text-slate-400">Invite code <span class="ml-1 rounded bg-slate-50 px-1.5 py-0.5 font-mono font-semibold text-slate-600">${escapeHtml(p.invite_code)}</span></p>`
+      : "";
+
+    return `
+      <div class="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg" data-id="${p.id}">
+        <div class="flex items-start justify-between">
+          <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-600"><i data-lucide="folder" class="h-5 w-5"></i></span>
+          <div class="flex items-center gap-1">
+            <button type="button" title="Edit project" class="edit-btn rounded-lg p-2 text-slate-400 transition hover:bg-brand-50 hover:text-brand-600"><i data-lucide="pencil" class="h-4 w-4"></i></button>
+            <button type="button" title="Delete project" class="delete-btn rounded-lg p-2 text-slate-400 transition hover:bg-red-50 hover:text-red-600"><i data-lucide="trash-2" class="h-4 w-4"></i></button>
+          </div>
+        </div>
+        <h3 class="mt-5 truncate text-xl font-bold text-slate-900">${escapeHtml(p.name)}</h3>
+        <div class="mt-2 flex flex-wrap items-center gap-3 text-xs">
+          <span class="rounded-full px-2.5 py-0.5 font-medium ${typePill}">${escapeHtml(p.type)}</span>
+          <span class="flex items-center gap-1.5 text-slate-500"><span class="h-2 w-2 rounded-full ${dot}"></span>${escapeHtml(p.status)}</span>
+          <span class="text-slate-400">${due}</span>
+        </div>
+        <p class="mt-3 min-h-[2.5rem] text-sm text-slate-500">${escapeHtml(p.description) || "No description"}</p>
+        <div class="mt-4">
+          <div class="flex justify-between text-sm"><span class="text-slate-600">Progress</span><span class="font-semibold text-brand-600">0%</span></div>
+          <div class="mt-2 h-2 rounded-full bg-slate-100"><div class="h-2 rounded-full bg-brand-600" style="width: 0%"></div></div>
+        </div>
+        ${invite}
+        <div class="mt-5 flex items-center justify-between border-t border-slate-100 pt-4 text-sm text-slate-500">
+          <div class="flex items-center gap-4">
+            <span class="flex items-center gap-1.5"><i data-lucide="users" class="h-4 w-4 text-brand-600"></i>Members</span>
+            <span class="flex items-center gap-1.5"><i data-lucide="file-text" class="h-4 w-4 text-brand-600"></i>Files</span>
+            <span class="flex items-center gap-1.5"><i data-lucide="layout-dashboard" class="h-4 w-4 text-brand-600"></i>Board</span>
+          </div>
+          <i data-lucide="chevron-right" class="h-5 w-5 text-slate-400"></i>
+        </div>
+      </div>`;
+  }
+
+  const newProjectCard = `
+    <a href="/projects/new" class="flex min-h-[18rem] flex-col items-center justify-center rounded-2xl border-2 border-dashed border-brand-100 bg-brand-50 p-6 text-center transition duration-200 hover:-translate-y-1 hover:border-brand-300 hover:shadow-md">
+      <span class="flex h-14 w-14 items-center justify-center rounded-full border-2 border-brand-600 text-brand-600"><i data-lucide="plus" class="h-6 w-6"></i></span>
+      <p class="mt-4 text-lg font-bold text-slate-900">Create a new project</p>
+      <p class="mt-1 max-w-[16rem] text-sm text-slate-500">Start a solo project or invite your peers to collaborate.</p>
+      <span class="mt-4 text-sm font-semibold text-brand-600">+ Create project</span>
+    </a>`;
+
+  function visibleProjects() {
+    const q = searchInput.value.trim().toLowerCase();
+    const list = allProjects.filter((p) => (p.name + " " + (p.description || "")).toLowerCase().includes(q));
+    const mode = sortSelect.value;
+    if (mode === "name") list.sort((a, b) => a.name.localeCompare(b.name));
+    else if (mode === "deadline") list.sort((a, b) => (a.deadline || "9999").localeCompare(b.deadline || "9999"));
+    else list.sort((a, b) => b.id - a.id);
+    return list;
+  }
+
+  function render() {
+    const list = visibleProjects();
+    grid.innerHTML = list.map(projectCard).join("") + newProjectCard;
+    if (!allProjects.length) statusMsg.textContent = "You have no projects yet. Create your first one below.";
+    else if (!list.length) statusMsg.textContent = "No projects match your search.";
+    else statusMsg.textContent = "";
+    refreshIcons();
+  }
+
+  async function loadProjects() {
+    try {
+      const res = await fetch("/api/projects", { headers: authHeaders() });
+      if (res.status === 401) {
+        window.location.replace("/auth/login");
+        return;
+      }
+      if (!res.ok) {
+        statusMsg.textContent = "Could not load your projects.";
+        return;
+      }
+      allProjects = await res.json();
+      render();
+    } catch (err) {
+      statusMsg.textContent = "Could not reach the server.";
+    }
+  }
+
+  function openEdit(id) {
+    const p = allProjects.find((x) => x.id === id);
+    if (!p) return;
+    editForm.dataset.id = id;
+    document.getElementById("edit-name").value = p.name;
+    document.getElementById("edit-description").value = p.description || "";
+    document.getElementById("edit-type").value = p.type;
+    document.getElementById("edit-status").value = p.status;
+    document.getElementById("edit-deadline").value = p.deadline || "";
+    editError.classList.add("hidden");
+    openModal(editModal);
+  }
+
+  async function removeProject(id) {
+    if (!confirm("Delete this project? This cannot be undone.")) return;
+    const res = await fetch("/api/projects/" + id, { method: "DELETE", headers: authHeaders() });
+    if (res.status === 204) loadProjects();
+    else alert("Could not delete the project.");
+  }
+
+  grid.addEventListener("click", (e) => {
+    const card = e.target.closest("[data-id]");
+    if (!card) return;
+    const id = Number(card.dataset.id);
+    if (e.target.closest(".edit-btn")) openEdit(id);
+    else if (e.target.closest(".delete-btn")) removeProject(id);
+  });
+
+  editForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const payload = {
+      name: document.getElementById("edit-name").value.trim(),
+      description: document.getElementById("edit-description").value.trim() || null,
+      type: document.getElementById("edit-type").value,
+      status: document.getElementById("edit-status").value,
+      deadline: document.getElementById("edit-deadline").value || null,
+    };
+    try {
+      const res = await fetch("/api/projects/" + editForm.dataset.id, {
+        method: "PATCH",
+        headers: authHeaders(),
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        closeModals();
+        loadProjects();
+        return;
+      }
+      const data = await res.json();
+      const detail = Array.isArray(data.detail) ? data.detail[0].msg : data.detail;
+      editError.textContent = detail || "Could not save your changes.";
+      editError.classList.remove("hidden");
+    } catch (err) {
+      editError.textContent = "Could not reach the server.";
+      editError.classList.remove("hidden");
+    }
+  });
+
+  document.getElementById("join-btn").addEventListener("click", () => {
+    joinMsg.classList.add("hidden");
+    joinForm.reset();
+    openModal(joinModal);
+  });
+
+  joinForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const code = document.getElementById("join-code").value.trim().toUpperCase();
+    joinMsg.classList.remove("hidden");
+    try {
+      const res = await fetch("/api/projects/join", {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({ invite_code: code }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        closeModals();
+        loadProjects();
+        return;
+      }
+      if (res.status === 405 || (res.status === 404 && data.detail === "Not Found")) {
+        joinMsg.className = "text-sm text-amber-600";
+        joinMsg.textContent = "Joining is not switched on yet. It needs the project members table.";
+        return;
+      }
+      joinMsg.className = "text-sm text-red-600";
+      joinMsg.textContent = data.detail || "Could not join this project.";
+    } catch (err) {
+      joinMsg.className = "text-sm text-red-600";
+      joinMsg.textContent = "Could not reach the server.";
+    }
+  });
+
+  document.querySelectorAll(".close-modal").forEach((btn) => btn.addEventListener("click", closeModals));
+  [editModal, joinModal].forEach((m) => m.addEventListener("click", (e) => {
+    if (e.target === m) closeModals();
+  }));
+  searchInput.addEventListener("input", render);
+  sortSelect.addEventListener("change", render);
+
+  const flash = sessionStorage.getItem("flash");
+  if (flash) {
+    const box = document.getElementById("flash");
+    box.textContent = flash;
+    box.classList.remove("hidden");
+    sessionStorage.removeItem("flash");
+  }
+
+  loadProjects();
 </script>
 {% endblock %}
