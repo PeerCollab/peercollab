@@ -26,3 +26,9 @@ document.addEventListener("click", (e) => {
     menu?.classList.add("hidden");
   }
 });
+
+document.getElementById("logout-btn")?.addEventListener("click", (e) => {
+  e.preventDefault();
+  localStorage.removeItem("access_token");
+  window.location.href = "/auth/login";
+});
