@@ -1,349 +1,290 @@
 {% extends "base.html" %}
 {% block title %}Projects - PeerCollab{% endblock %}
+
 {% block content %}
 {% set field = "mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100" %}
 {% set solid = "inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-brand-700 hover:shadow-lg" %}
 {% set outline = "inline-flex items-center gap-2 rounded-xl border border-brand-600 bg-white px-5 py-3 text-sm font-semibold text-brand-600 transition duration-200 hover:-translate-y-0.5 hover:bg-brand-50 hover:shadow-md" %}
 
-<div class="flex flex-wrap items-start justify-between gap-4">
-  <div>
-    <p class="text-xs font-semibold uppercase tracking-widest text-brand-600">Your collaborative workspace</p>
-    <h1 class="mt-1 text-3xl font-bold text-slate-900">Projects</h1>
-    <p class="mt-1 text-slate-500">Plan your work, track progress, and collaborate with your peers.</p>
-  </div>
-  <div class="flex gap-3">
-    <button id="join-btn" type="button" class="{{ outline }}"><i data-lucide="users" class="h-4 w-4"></i> Join a project</button>
-    <a href="/projects/new" class="{{ solid }}"><i data-lucide="plus" class="h-4 w-4"></i> Create project</a>
-  </div>
+<!-- PAGE HEADER -->
+<section class="mx-auto max-w-7xl">
+<div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-600">
+            Your collaborative workspace
+        </p>
+    <h1 class="mt-1 text-2xl font-semibold tracking-tight text-slate-900">
+        Projects
+    </h1>
+    <p class="mt-2 text-sm text-slate-500">
+        Plan your work, track progress, and collaborate with your peers.
+    </p>
 </div>
-
-<hr class="my-6 border-slate-100">
-
-<div id="flash" class="mb-4 hidden rounded-xl bg-green-50 px-4 py-3 text-sm font-medium text-green-700"></div>
-
-<div class="mb-6 flex flex-wrap items-center justify-between gap-3">
-  <div class="relative w-full max-w-md">
-    <i data-lucide="search" class="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"></i>
-    <input id="search-input" type="text" placeholder="Search projects..."
-      class="w-full rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100">
-  </div>
-  <div class="flex items-center gap-3 text-sm text-slate-500">
-    <label for="sort-select">Sort by</label>
-    <select id="sort-select" class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100">
-      <option value="recent">Recently added</option>
-      <option value="name">Name (A-Z)</option>
-      <option value="deadline">Deadline (soonest)</option>
+<div class="flex gap-3">
+    <button id="join-btn" type="button" class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50">
+        <i data-lucide="users" class="h-4 w-4"></i>
+        Join a project
+    </button>
+    <a href="/projects/new" class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-700">
+        <i data-lucide="plus" class="h-4 w-4"></i>
+        Create project
+    </a>
+</div>
+</div>
+<!-- SUCCESS MESSAGE -->
+<div id="flash"
+     role="status"
+     aria-live="polite"
+     class="mb-4 hidden rounded-xl bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
+</div>
+<!-- GENERAL ERROR MESSAGE -->
+<div id="project-error"
+     role="alert"
+     aria-live="assertive"
+     class="mb-4 hidden rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+</div>
+<!-- SEARCH AND SORT -->
+<div class="mt-5 flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:items-center">
+    <div class="relative w-full max-w-md">
+        <i data-lucide="search"
+           class="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"></i>
+    <input id="search-input"
+           type="text"
+           placeholder="Search projects..."
+           class="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-700 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100">
+</div>
+<label class="flex items-center gap-2 text-sm text-slate-500 sm:ml-auto">
+    <span>Sort by</span>
+    <select id="sort-select"
+            aria-label="Sort projects"
+            class="rounded-lg border border-slate-200 bg-white py-2.5 pl-3 pr-8 text-sm font-medium text-slate-700 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100">
+        <option value="recent">Recently added</option>
+        <option value="name">Name (A-Z)</option>
+        <option value="deadline">Deadline (soonest)</option>
     </select>
-  </div>
+</label>
+<p id="status-msg" class="text-sm text-slate-500 sm:ml-3">
+    Loading your projects...
+</p>
 </div>
-
-<p id="status-msg" class="mb-4 text-sm text-slate-500">Loading your projects...</p>
-<div id="project-grid" class="grid gap-6 md:grid-cols-2 xl:grid-cols-3"></div>
-
-<!-- EDIT WINDOW -->
-<div id="edit-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 p-4">
-  <form id="edit-form" class="w-full max-w-lg space-y-4 rounded-2xl bg-white p-6 shadow-xl">
+<!-- PROJECT CARDS -->
+<div id="project-grid" class="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3"></div>
+</section>
+<!-- ================================================== -->
+<!-- EDIT PROJECT MODAL -->
+<!-- ================================================== -->
+<div id="edit-modal"
+     class="fixed inset-0 z-50 hidden items-center justify-center overflow-y-auto bg-slate-900/40 p-4">
+<form id="edit-form"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="edit-title"
+      class="my-auto w-full max-w-lg space-y-4 rounded-2xl bg-white p-6 shadow-xl">
+    <!-- MODAL HEADER -->
     <div class="flex items-center justify-between">
-      <h2 class="text-xl font-bold text-slate-900">Edit project</h2>
-      <button type="button" class="close-modal rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"><i data-lucide="x" class="h-4 w-4"></i></button>
+        <h2 id="edit-title" class="text-lg font-semibold text-slate-900">
+            Edit project
+        </h2>
+        <button type="button"
+                class="close-modal rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                aria-label="Close edit project dialog">
+            <i data-lucide="x" class="h-4 w-4"></i>
+        </button>
     </div>
+    <!-- PROJECT NAME -->
     <div>
-      <label for="edit-name" class="block text-sm font-medium text-slate-700">Project name</label>
-      <input id="edit-name" type="text" required maxlength="100" class="{{ field }}">
+        <label for="edit-name"
+               class="block text-sm font-medium text-slate-700">
+            Project name
+        </label>
+        <input id="edit-name"
+               name="name"
+               type="text"
+               required
+               maxlength="100"
+               class="{{ field }}">
     </div>
+    <!-- PROJECT DESCRIPTION -->
     <div>
-      <label for="edit-description" class="block text-sm font-medium text-slate-700">Description</label>
-      <textarea id="edit-description" rows="3" class="{{ field }}"></textarea>
+        <label for="edit-description"
+               class="block text-sm font-medium text-slate-700">
+            Description
+        </label>
+        <textarea id="edit-description"
+                  name="description"
+                  rows="3"
+                  class="{{ field }}"></textarea>
     </div>
-    <div class="grid grid-cols-2 gap-4">
-      <div>
-        <label for="edit-type" class="block text-sm font-medium text-slate-700">Project type</label>
-        <select id="edit-type" class="{{ field }}">
-          <option value="Solo">Solo</option>
-          <option value="Group">Group</option>
-        </select>
-      </div>
-      <div>
-        <label for="edit-status" class="block text-sm font-medium text-slate-700">Status</label>
-        <select id="edit-status" class="{{ field }}">
-          <option value="Ongoing">Ongoing</option>
-          <option value="Completed">Completed</option>
-        </select>
-      </div>
+    <!-- PROJECT TYPE AND STATUS -->
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+            <label for="edit-type"
+                   class="block text-sm font-medium text-slate-700">
+                Project type
+            </label>
+            <select id="edit-type"
+                    name="type"
+                    class="{{ field }}">
+                <option value="Solo">Solo</option>
+                <option value="Group">Group</option>
+            </select>
+        </div>
+        <div>
+            <label for="edit-status"
+                   class="block text-sm font-medium text-slate-700">
+                Status
+            </label>
+            <select id="edit-status"
+                    name="status"
+                    class="{{ field }}">
+                <option value="Ongoing">Ongoing</option>
+                <option value="Completed">Completed</option>
+            </select>
+        </div>
     </div>
+    <!-- PROJECT DEADLINE -->
     <div>
-      <label for="edit-deadline" class="block text-sm font-medium text-slate-700">Deadline (optional)</label>
-      <input id="edit-deadline" type="date" class="{{ field }}">
+        <label for="edit-deadline"
+               class="block text-sm font-medium text-slate-700">
+            Deadline (optional)
+        </label>
+        <input id="edit-deadline"
+               name="deadline"
+               type="date"
+               class="{{ field }}">
     </div>
-    <p id="edit-error" class="hidden text-sm text-red-600"></p>
+    <!-- EDIT ERROR MESSAGE -->
+    <p id="edit-error"
+       role="alert"
+       aria-live="assertive"
+       class="hidden text-sm text-red-600">
+    </p>
+    <!-- MODAL BUTTONS -->
     <div class="flex justify-end gap-3 pt-2">
-      <button type="button" class="close-modal rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">Cancel</button>
-      <button type="submit" class="{{ solid }}">Save changes</button>
+        <button type="button"
+                class="close-modal rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">
+            Cancel
+        </button>
+        <button id="edit-save-btn"
+                type="submit"
+                class="{{ solid }}">
+            Save changes
+        </button>
     </div>
-  </form>
+</form>
+</div>
+<!-- ================================================== -->
+<!-- DELETE CONFIRMATION MODAL -->
+<!-- ================================================== -->
+<div id="delete-modal"
+     class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 p-4">
+<div role="dialog"
+     aria-modal="true"
+     aria-labelledby="delete-title"
+     aria-describedby="delete-description"
+     class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+    <!-- DELETE ICON AND TITLE -->
+    <div class="flex items-start gap-4">
+        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600">
+            <i data-lucide="trash-2" class="h-5 w-5"></i>
+        </div>
+        <div>
+            <h2 id="delete-title"
+                class="text-lg font-semibold text-slate-900">
+                Delete project?
+            </h2>
+            <p id="delete-description"
+               class="mt-2 text-sm leading-6 text-slate-500">
+                Are you sure you want to delete this project? This action cannot be undone.
+            </p>
+        </div>
+    </div>
+    <!-- DELETE ERROR MESSAGE -->
+    <p id="delete-error"
+       role="alert"
+       aria-live="assertive"
+       class="mt-4 hidden text-sm text-red-600">
+    </p>
+    <!-- DELETE BUTTONS -->
+    <div class="mt-6 flex justify-end gap-3">
+        <button id="delete-cancel-btn"
+                type="button"
+                class="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">
+            Cancel
+        </button>
+        <button id="delete-confirm-btn"
+                type="button"
+                class="inline-flex items-center gap-2 rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700">
+            <i data-lucide="trash-2" class="h-4 w-4"></i>
+            Delete project
+        </button>
+    </div>
+</div>
+</div>
+<!-- ================================================== -->
+<!-- JOIN PROJECT MODAL -->
+<!-- ================================================== -->
+<div id="join-modal"
+     class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 p-4">
+<form id="join-form"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="join-title"
+      class="w-full max-w-md space-y-4 rounded-2xl bg-white p-6 shadow-xl">
+    <!-- MODAL HEADER -->
+    <div class="flex items-center justify-between">
+        <h2 id="join-title"
+            class="text-lg font-semibold text-slate-900">
+            Join a project
+        </h2>
+        <button type="button"
+                class="close-modal rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                aria-label="Close join project dialog">
+            <i data-lucide="x" class="h-4 w-4"></i>
+        </button>
+    </div>
+    <p class="text-sm text-slate-500">
+        Enter the 8-character invite code your teammate shared with you.
+    </p>
+    <!-- INVITE CODE -->
+    <input id="join-code"
+           name="invite_code"
+           type="text"
+           maxlength="8"
+           minlength="8"
+           required
+           autocomplete="off"
+           placeholder="e.g. AB12CD34"
+           class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-center font-mono text-lg uppercase tracking-widest focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100">
+    <!-- JOIN ERROR MESSAGE -->
+    <p id="join-msg"
+       role="status"
+       aria-live="polite"
+       class="hidden text-sm">
+    </p>
+    <!-- MODAL BUTTONS -->
+    <div class="flex justify-end gap-3 pt-2">
+        <button type="button"
+                class="close-modal rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">
+            Cancel
+        </button>
+        <button id="join-submit-btn"
+                type="submit"
+                class="{{ solid }}">
+            Join project
+        </button>
+    </div>
+</form>
 </div>
 
-<!-- JOIN WINDOW -->
-<div id="join-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 p-4">
-  <form id="join-form" class="w-full max-w-md space-y-4 rounded-2xl bg-white p-6 shadow-xl">
-    <div class="flex items-center justify-between">
-      <h2 class="text-xl font-bold text-slate-900">Join a project</h2>
-      <button type="button" class="close-modal rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"><i data-lucide="x" class="h-4 w-4"></i></button>
-    </div>
-    <p class="text-sm text-slate-500">Enter the 8-character invite code your teammate shared with you.</p>
-    <input id="join-code" type="text" maxlength="8" required placeholder="e.g. AB12CD34"
-      class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-center font-mono text-lg uppercase tracking-widest focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100">
-    <p id="join-msg" class="hidden text-sm"></p>
-    <div class="flex justify-end gap-3 pt-2">
-      <button type="button" class="close-modal rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">Cancel</button>
-      <button type="submit" class="{{ solid }}">Join project</button>
-    </div>
-  </form>
-</div>
 {% endblock %}
 
+<!-- ================================================== -->
+<!-- EXTERNAL JAVASCRIPT -->
+<!-- ================================================== -->
+
 {% block scripts %}
-<script>
-  const grid = document.getElementById("project-grid");
-  const statusMsg = document.getElementById("status-msg");
-  const searchInput = document.getElementById("search-input");
-  const sortSelect = document.getElementById("sort-select");
-  const editModal = document.getElementById("edit-modal");
-  const editForm = document.getElementById("edit-form");
-  const editError = document.getElementById("edit-error");
-  const joinModal = document.getElementById("join-modal");
-  const joinForm = document.getElementById("join-form");
-  const joinMsg = document.getElementById("join-msg");
-  let allProjects = [];
 
-  function authHeaders() {
-    return {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + localStorage.getItem("access_token"),
-    };
-  }
+<script src="/static/js/projects.js?v=4" defer></script>
 
-  function escapeHtml(text) {
-    const div = document.createElement("div");
-    div.textContent = text || "";
-    return div.innerHTML;
-  }
-
-  function formatDate(value) {
-    const d = new Date(value + "T00:00:00");
-    return d.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
-  }
-
-  function openModal(modal) {
-    modal.classList.remove("hidden");
-    modal.classList.add("flex");
-  }
-
-  function closeModals() {
-    [editModal, joinModal].forEach((m) => {
-      m.classList.add("hidden");
-      m.classList.remove("flex");
-    });
-  }
-
-  function refreshIcons() {
-    if (window.lucide) lucide.createIcons();
-  }
-
-  function projectCard(p) {
-    const isGroup = p.type === "Group";
-    const typePill = isGroup ? "bg-brand-50 text-brand-600" : "bg-slate-100 text-slate-600";
-    const dot = p.status === "Completed" ? "bg-green-500" : "bg-amber-400";
-    const due = p.deadline ? "Due " + formatDate(p.deadline) : "No deadline";
-    const invite = isGroup && p.invite_code
-      ? `<p class="mt-3 text-xs text-slate-400">Invite code <span class="ml-1 rounded bg-slate-50 px-1.5 py-0.5 font-mono font-semibold text-slate-600">${escapeHtml(p.invite_code)}</span></p>`
-      : "";
-
-    return `
-      <div class="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg" data-id="${p.id}">
-        <div class="flex items-start justify-between">
-          <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-600"><i data-lucide="folder" class="h-5 w-5"></i></span>
-          <div class="flex items-center gap-1">
-            <button type="button" title="Edit project" class="edit-btn rounded-lg p-2 text-slate-400 transition hover:bg-brand-50 hover:text-brand-600"><i data-lucide="pencil" class="h-4 w-4"></i></button>
-            <button type="button" title="Delete project" class="delete-btn rounded-lg p-2 text-slate-400 transition hover:bg-red-50 hover:text-red-600"><i data-lucide="trash-2" class="h-4 w-4"></i></button>
-          </div>
-        </div>
-        <h3 class="mt-5 truncate text-xl font-bold text-slate-900">${escapeHtml(p.name)}</h3>
-        <div class="mt-2 flex flex-wrap items-center gap-3 text-xs">
-          <span class="rounded-full px-2.5 py-0.5 font-medium ${typePill}">${escapeHtml(p.type)}</span>
-          <span class="flex items-center gap-1.5 text-slate-500"><span class="h-2 w-2 rounded-full ${dot}"></span>${escapeHtml(p.status)}</span>
-          <span class="text-slate-400">${due}</span>
-        </div>
-        <p class="mt-3 min-h-[2.5rem] text-sm text-slate-500">${escapeHtml(p.description) || "No description"}</p>
-        <div class="mt-4">
-          <div class="flex justify-between text-sm"><span class="text-slate-600">Progress</span><span class="font-semibold text-brand-600">0%</span></div>
-          <div class="mt-2 h-2 rounded-full bg-slate-100"><div class="h-2 rounded-full bg-brand-600" style="width: 0%"></div></div>
-        </div>
-        ${invite}
-        <div class="mt-5 flex items-center justify-between border-t border-slate-100 pt-4 text-sm text-slate-500">
-          <div class="flex items-center gap-4">
-            <span class="flex items-center gap-1.5"><i data-lucide="users" class="h-4 w-4 text-brand-600"></i>Members</span>
-            <span class="flex items-center gap-1.5"><i data-lucide="file-text" class="h-4 w-4 text-brand-600"></i>Files</span>
-            <span class="flex items-center gap-1.5"><i data-lucide="layout-dashboard" class="h-4 w-4 text-brand-600"></i>Board</span>
-          </div>
-          <i data-lucide="chevron-right" class="h-5 w-5 text-slate-400"></i>
-        </div>
-      </div>`;
-  }
-
-  const newProjectCard = `
-    <a href="/projects/new" class="flex min-h-[18rem] flex-col items-center justify-center rounded-2xl border-2 border-dashed border-brand-100 bg-brand-50 p-6 text-center transition duration-200 hover:-translate-y-1 hover:border-brand-300 hover:shadow-md">
-      <span class="flex h-14 w-14 items-center justify-center rounded-full border-2 border-brand-600 text-brand-600"><i data-lucide="plus" class="h-6 w-6"></i></span>
-      <p class="mt-4 text-lg font-bold text-slate-900">Create a new project</p>
-      <p class="mt-1 max-w-[16rem] text-sm text-slate-500">Start a solo project or invite your peers to collaborate.</p>
-      <span class="mt-4 text-sm font-semibold text-brand-600">+ Create project</span>
-    </a>`;
-
-  function visibleProjects() {
-    const q = searchInput.value.trim().toLowerCase();
-    const list = allProjects.filter((p) => (p.name + " " + (p.description || "")).toLowerCase().includes(q));
-    const mode = sortSelect.value;
-    if (mode === "name") list.sort((a, b) => a.name.localeCompare(b.name));
-    else if (mode === "deadline") list.sort((a, b) => (a.deadline || "9999").localeCompare(b.deadline || "9999"));
-    else list.sort((a, b) => b.id - a.id);
-    return list;
-  }
-
-  function render() {
-    const list = visibleProjects();
-    grid.innerHTML = list.map(projectCard).join("") + newProjectCard;
-    if (!allProjects.length) statusMsg.textContent = "You have no projects yet. Create your first one below.";
-    else if (!list.length) statusMsg.textContent = "No projects match your search.";
-    else statusMsg.textContent = "";
-    refreshIcons();
-  }
-
-  async function loadProjects() {
-    try {
-      const res = await fetch("/api/projects", { headers: authHeaders() });
-      if (res.status === 401) {
-        window.location.replace("/auth/login");
-        return;
-      }
-      if (!res.ok) {
-        statusMsg.textContent = "Could not load your projects.";
-        return;
-      }
-      allProjects = await res.json();
-      render();
-    } catch (err) {
-      statusMsg.textContent = "Could not reach the server.";
-    }
-  }
-
-  function openEdit(id) {
-    const p = allProjects.find((x) => x.id === id);
-    if (!p) return;
-    editForm.dataset.id = id;
-    document.getElementById("edit-name").value = p.name;
-    document.getElementById("edit-description").value = p.description || "";
-    document.getElementById("edit-type").value = p.type;
-    document.getElementById("edit-status").value = p.status;
-    document.getElementById("edit-deadline").value = p.deadline || "";
-    editError.classList.add("hidden");
-    openModal(editModal);
-  }
-
-  async function removeProject(id) {
-    if (!confirm("Delete this project? This cannot be undone.")) return;
-    const res = await fetch("/api/projects/" + id, { method: "DELETE", headers: authHeaders() });
-    if (res.status === 204) loadProjects();
-    else alert("Could not delete the project.");
-  }
-
-  grid.addEventListener("click", (e) => {
-    const card = e.target.closest("[data-id]");
-    if (!card) return;
-    const id = Number(card.dataset.id);
-    if (e.target.closest(".edit-btn")) openEdit(id);
-    else if (e.target.closest(".delete-btn")) removeProject(id);
-  });
-
-  editForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const payload = {
-      name: document.getElementById("edit-name").value.trim(),
-      description: document.getElementById("edit-description").value.trim() || null,
-      type: document.getElementById("edit-type").value,
-      status: document.getElementById("edit-status").value,
-      deadline: document.getElementById("edit-deadline").value || null,
-    };
-    try {
-      const res = await fetch("/api/projects/" + editForm.dataset.id, {
-        method: "PATCH",
-        headers: authHeaders(),
-        body: JSON.stringify(payload),
-      });
-      if (res.ok) {
-        closeModals();
-        loadProjects();
-        return;
-      }
-      const data = await res.json();
-      const detail = Array.isArray(data.detail) ? data.detail[0].msg : data.detail;
-      editError.textContent = detail || "Could not save your changes.";
-      editError.classList.remove("hidden");
-    } catch (err) {
-      editError.textContent = "Could not reach the server.";
-      editError.classList.remove("hidden");
-    }
-  });
-
-  document.getElementById("join-btn").addEventListener("click", () => {
-    joinMsg.classList.add("hidden");
-    joinForm.reset();
-    openModal(joinModal);
-  });
-
-  joinForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const code = document.getElementById("join-code").value.trim().toUpperCase();
-    joinMsg.classList.remove("hidden");
-    try {
-      const res = await fetch("/api/projects/join", {
-        method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify({ invite_code: code }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        closeModals();
-        loadProjects();
-        return;
-      }
-      if (res.status === 405 || (res.status === 404 && data.detail === "Not Found")) {
-        joinMsg.className = "text-sm text-amber-600";
-        joinMsg.textContent = "Joining is not switched on yet. It needs the project members table.";
-        return;
-      }
-      joinMsg.className = "text-sm text-red-600";
-      joinMsg.textContent = data.detail || "Could not join this project.";
-    } catch (err) {
-      joinMsg.className = "text-sm text-red-600";
-      joinMsg.textContent = "Could not reach the server.";
-    }
-  });
-
-  document.querySelectorAll(".close-modal").forEach((btn) => btn.addEventListener("click", closeModals));
-  [editModal, joinModal].forEach((m) => m.addEventListener("click", (e) => {
-    if (e.target === m) closeModals();
-  }));
-  searchInput.addEventListener("input", render);
-  sortSelect.addEventListener("change", render);
-
-  const flash = sessionStorage.getItem("flash");
-  if (flash) {
-    const box = document.getElementById("flash");
-    box.textContent = flash;
-    box.classList.remove("hidden");
-    sessionStorage.removeItem("flash");
-  }
-
-  loadProjects();
-</script>
 {% endblock %}

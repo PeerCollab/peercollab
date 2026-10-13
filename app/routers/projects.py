@@ -11,7 +11,8 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.project import Project
 from app.models.user import User
-from app.schemas.project import ProjectCreate, ProjectOut, ProjectUpdate
+# "error"
+from app.schemas.projects import ProjectCreate, ProjectOut, ProjectUpdate
 from app.utils.dependencies import get_current_user
 
 router = APIRouter(tags=["Projects"])
@@ -42,7 +43,12 @@ def projects_page(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="project/projects.html",
-        context={"active_page": "projects", "page_title": "Projects"},
+        context={
+            "active_page": "projects",
+            "page_title": "Projects",
+            "solid": "btn btn-primary",
+            "field": "form-input",
+        },
     )
 
 

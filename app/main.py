@@ -1,8 +1,17 @@
-from pathlib import Path
-from fastapi import FastAPI, Request
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 from app.routers import auth, dashboard, course, course_note, course_task, projects
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI, Request
+from pathlib import Path
+from fastapi import FastAPI
+
+app = FastAPI(debug=True)
+
+
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
