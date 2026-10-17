@@ -40,52 +40,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
-  const form = document.getElementById("create-project-form");
-  const errorBox = document.getElementById("form-error");
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    errorBox.classList.add("hidden");
-
-    const payload = {
-      name: document.getElementById("name").value.trim(),
-      description: document.getElementById("description").value.trim() || null,
-      type: document.getElementById("type").value,
-      deadline: document.getElementById("deadline").value || null,
-    };
-
-    try {
-      const res = await fetch("/api/projects", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer " + localStorage.getItem("access_token"),
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (res.status === 401) {
-        window.location.replace("/auth/login");
-        return;
-      }
-
-      const data = await res.json();
-      if (!res.ok) {
-        const detail = Array.isArray(data.detail) ? data.detail[0].msg : data.detail;
-        errorBox.textContent = detail || "Something went wrong.";
-        errorBox.classList.remove("hidden");
-        return;
-      }
-
-      let text = "Project created!";
-      if (data.invite_code) text += " Invite code: " + data.invite_code;
-      sessionStorage.setItem("flash", text);
-      window.location.href = "/projects";
-    } catch (err) {
-      errorBox.textContent = "Could not reach the server.";
-      errorBox.classList.remove("hidden");
-    }
-  });
-</script>
+<script src="/static/js/create_project.js?v=2" defer></script>
 {% endblock %}

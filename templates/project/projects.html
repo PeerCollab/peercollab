@@ -63,12 +63,25 @@
         <option value="deadline">Deadline (soonest)</option>
     </select>
 </label>
-<p id="status-msg" class="text-sm text-slate-500 sm:ml-3">
-    Loading your projects...
-</p>
 </div>
 <!-- PROJECT CARDS -->
-<div id="project-grid" class="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3"></div>
+<div id="project-grid" class="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+    <a href="/projects/new"
+       class="flex min-h-[220px] h-full flex-col items-center justify-center rounded-xl border-2 border-dashed border-brand-200 bg-brand-50 p-5 text-center transition-colors hover:border-brand-400 hover:bg-brand-100"
+       aria-label="Create a new project">
+        <span class="flex h-12 w-12 items-center justify-center rounded-full border-2 border-brand-500 bg-brand-100 text-brand-600 shadow-sm transition-all duration-200 hover:bg-brand-500 hover:text-white hover:shadow-md">
+            <i data-lucide="plus" class="h-6 w-6"></i>
+        </span>
+        <span class="mt-4 text-lg font-semibold text-slate-900">Create new project</span>
+        <span class="mt-2 max-w-[220px] text-sm leading-5 text-slate-700">
+            Start a project to organise your work and collaborate with your team.
+        </span>
+        <span class="mt-4 flex items-center gap-1 text-sm font-semibold text-brand-700">
+            <i data-lucide="plus" class="h-4 w-4"></i>
+            Create project
+        </span>
+    </a>
+</div>
 </section>
 <!-- ================================================== -->
 <!-- EDIT PROJECT MODAL -->
@@ -285,6 +298,6 @@
 
 {% block scripts %}
 
-<script src="/static/js/projects.js?v=4" defer></script>
+<script src="/static/js/projects.js?v=6" defer></script>
 
 {% endblock %}

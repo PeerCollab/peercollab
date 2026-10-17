@@ -43,8 +43,10 @@
 
   let projects = [];
   let editingProjectId = null;
+  let originalEditPayload = null;
   let deletingProjectId = null;
   let lastFocusedElement = null;
+  let flashTimeoutId = null;
 
   // ==========================================
   // AUTHENTICATION HEADERS
@@ -100,6 +102,21 @@
 
     element.textContent = "";
     element.classList.add("hidden");
+  }
+
+  function showFlash(message) {
+    if (!flash) return;
+
+    if (flashTimeoutId !== null) {
+      window.clearTimeout(flashTimeoutId);
+    }
+
+    showMessage(flash, message, "success");
+    flash.classList.remove("hidden");
+    flashTimeoutId = window.setTimeout(() => {
+      hideMessage(flash);
+      flashTimeoutId = null;
+    }, 5000);
   }
 
   async function readResponse(response) {
@@ -421,41 +438,22 @@
 
     projectGrid.innerHTML = "";
 
-    if (filtered.length === 0) {
-      const emptyMessage = searchInput?.value.trim()
-        ? "No projects match your search."
-        : "You haven't created or joined any projects yet.";
-
+    if (filtered.length === 0 && projects.length > 0) {
       projectGrid.innerHTML = `
                 <div class="col-span-full rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center">
-
-                    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-500">
-                        <i data-lucide="folder-open" class="h-6 w-6"></i>
-                    </div>
-
                     <p class="mt-4 text-sm font-medium text-slate-700">
-                        ${escapeHtml(emptyMessage)}
+                        No projects match your search.
                     </p>
-
                     <p class="mt-1 text-sm text-slate-500">
-                        Create a project to get started.
+                        Try a different search term.
                     </p>
-
-                    <a href="/projects/new"
-                       class="mt-4 inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700">
-
-                        <i data-lucide="plus" class="h-4 w-4"></i>
-                        Create project
-
-                    </a>
-
                 </div>
             `;
-    } else {
-      projectGrid.innerHTML =
-        filtered.map(projectCard).join("") +
-        newProjectCard();
+    } else if (filtered.length > 0) {
+      projectGrid.innerHTML = filtered.map(projectCard).join("");
     }
+
+    projectGrid.insertAdjacentHTML("beforeend", newProjectCard());
 
     if (statusMsg) {
       statusMsg.textContent =
@@ -509,7 +507,8 @@
       projects = [];
 
       if (projectGrid) {
-        projectGrid.innerHTML = "";
+        projectGrid.innerHTML = newProjectCard();
+        refreshIcons();
       }
 
       if (statusMsg) {
@@ -544,6 +543,13 @@
 
     const deadline = project.deadline || project.due_date || "";
     editDeadline.value = String(deadline).slice(0, 10);
+    originalEditPayload = {
+      name: editName.value.trim(),
+      description: editDescription.value.trim(),
+      type: editType.value,
+      status: editStatus.value,
+      deadline: editDeadline.value || null
+    };
 
     hideMessage(editError);
 
@@ -568,6 +574,13 @@
     if (!payload.name) {
       showMessage(editError, "Please enter a project name.");
       editName.focus();
+      return;
+    }
+
+    if (JSON.stringify(payload) === JSON.stringify(originalEditPayload)) {
+      closeModal(editModal);
+      editingProjectId = null;
+      originalEditPayload = null;
       return;
     }
 
@@ -598,11 +611,9 @@
       }
 
       closeModal(editModal);
-
-      if (flash) {
-        showMessage(flash, "Project updated successfully.", "success");
-        flash.classList.remove("hidden");
-      }
+      editingProjectId = null;
+      originalEditPayload = null;
+      showFlash("Project updated successfully.");
 
       await loadProjects();
 
@@ -679,11 +690,7 @@
       }
 
       closeModal(deleteModal);
-
-      if (flash) {
-        showMessage(flash, "Project deleted successfully.", "success");
-        flash.classList.remove("hidden");
-      }
+      showFlash("Project deleted successfully.");
 
       deletingProjectId = null;
 
@@ -795,11 +802,7 @@
       }
 
       closeModal(joinModal);
-
-      if (flash) {
-        showMessage(flash, "You joined the project successfully.", "success");
-        flash.classList.remove("hidden");
-      }
+      showFlash("You joined the project successfully.");
 
       await loadProjects();
 
@@ -831,9 +834,8 @@
 
   const flashMessage = sessionStorage.getItem("project_flash");
 
-  if (flashMessage && flash) {
-    showMessage(flash, flashMessage, "success");
-    flash.classList.remove("hidden");
+  if (flashMessage) {
+    showFlash(flashMessage);
     sessionStorage.removeItem("project_flash");
   }
 
