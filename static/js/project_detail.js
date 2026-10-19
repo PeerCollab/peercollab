@@ -58,6 +58,22 @@
       const overviewDeadline = document.getElementById("overview-deadline");
       if (overviewDeadline) overviewDeadline.textContent = project.deadline || "Not set";
 
+      const collaborationTitle = document.getElementById("collaboration-title");
+      const collaborationDescription = document.getElementById("collaboration-description");
+      if (project.type === "Group") {
+        if (collaborationTitle) collaborationTitle.textContent = "Bring your team together";
+        if (collaborationDescription) {
+          collaborationDescription.textContent = project.invite_code
+            ? "Invite teammates to join this project and collaborate in one shared workspace."
+            : "Group project invite details are not available yet.";
+        }
+      } else {
+        if (collaborationTitle) collaborationTitle.textContent = "Your project workspace";
+        if (collaborationDescription) {
+          collaborationDescription.textContent = "Use the project sections above to organize your work. Invite codes are available for group projects.";
+        }
+      }
+
       if (project.invite_code) {
         const invite = document.getElementById("project-invite");
         const inviteCode = document.getElementById("project-invite-code");
