@@ -61,6 +61,30 @@ def create_project_page(request: Request):
     )
 
 
+@router.get("/projects/{project_id:int}", response_class=HTMLResponse)
+def project_workspace_page(request: Request, project_id: int, tab: str = "overview"):
+    page_by_tab = {
+        "overview": "project/overview.html",
+        "chat": "project/chat.html",
+        "members": "project/members.html",
+        "kanban": "project/kanban.html",
+    }
+    page = page_by_tab.get(tab)
+    if page is None:
+        raise HTTPException(status_code=404, detail="Project section not found")
+
+    return templates.TemplateResponse(
+        request=request,
+        name=page,
+        context={
+            "active_page": "projects",
+            "active_tab": tab,
+            "page_title": "Project workspace",
+            "project_id": project_id,
+        },
+    )
+
+
 # ---------- API (JSON) ----------
 @router.post("/api/projects", response_model=ProjectOut, status_code=status.HTTP_201_CREATED)
 def create_project(

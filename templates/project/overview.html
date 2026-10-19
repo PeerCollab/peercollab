@@ -1,0 +1,39 @@
+{% extends "project/project_base.html" %}
+
+{% block project_content %}
+<div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(260px,1fr)]">
+    <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="flex items-center gap-2 text-brand-600">
+            <i data-lucide="layout-dashboard" class="h-5 w-5"></i>
+            <p class="text-xs font-semibold uppercase tracking-[0.14em]">Overview</p>
+        </div>
+        <h2 class="mt-3 text-lg font-semibold text-slate-900">About this project</h2>
+        <p id="overview-description" class="mt-2 whitespace-pre-line text-sm leading-6 text-slate-500">
+            Project details will appear here.
+        </p>
+    </section>
+
+    <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 class="text-lg font-semibold text-slate-900">Project details</h2>
+        <dl class="mt-4 space-y-4 text-sm">
+            <div class="flex items-start justify-between gap-4">
+                <dt class="text-slate-500">Status</dt>
+                <dd id="overview-status" class="font-medium text-slate-800">Loading...</dd>
+            </div>
+            <div class="flex items-start justify-between gap-4">
+                <dt class="text-slate-500">Type</dt>
+                <dd id="overview-type" class="font-medium text-slate-800">Loading...</dd>
+            </div>
+            <div class="flex items-start justify-between gap-4">
+                <dt class="text-slate-500">Deadline</dt>
+                <dd id="overview-deadline" class="font-medium text-slate-800">Not set</dd>
+            </div>
+        </dl>
+        <div id="project-invite" class="mt-5 hidden rounded-lg bg-brand-50 p-4">
+            <p class="text-xs font-semibold uppercase tracking-wide text-brand-700">Invite code</p>
+            <p id="project-invite-code" class="mt-1 font-mono text-lg font-semibold tracking-wider text-brand-900"></p>
+            <p class="mt-1 text-xs text-brand-700">Share this code with teammates to invite them.</p>
+        </div>
+    </section>
+</div>
+{% endblock %}
