@@ -61,13 +61,27 @@ def create_project_page(request: Request):
     )
 
 
+@router.get("/projects/{project_id:int}/edit", response_class=HTMLResponse)
+def edit_project_page(request: Request, project_id: int):
+    return templates.TemplateResponse(
+        request=request,
+        name="project/settings.html",
+        context={
+            "active_page": "projects",
+            "page_title": "Project settings",
+            "project_id": project_id,
+        },
+    )
+
+
 @router.get("/projects/{project_id:int}", response_class=HTMLResponse)
 def project_workspace_page(request: Request, project_id: int, tab: str = "overview"):
     page_by_tab = {
         "overview": "project/overview.html",
-        "chat": "project/chat.html",
-        "members": "project/members.html",
         "kanban": "project/kanban.html",
+        "chat": "project/chat.html",
+        "files": "project/files.html",
+        "members": "project/members.html",
     }
     page = page_by_tab.get(tab)
     if page is None:

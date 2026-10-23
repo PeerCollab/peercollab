@@ -288,7 +288,7 @@
     const statusClass =
       String(status).toLowerCase() === "completed"
         ? "bg-green-50 text-green-700"
-        : "bg-blue-50 text-blue-700";
+        : "bg-brand-50 text-brand-700";
 
     return `
             <article class="project-card flex min-h-[250px] h-full flex-col rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-brand-500"
