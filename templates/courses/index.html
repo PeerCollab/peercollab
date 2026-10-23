@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }} | PeerCollab{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="/static/css/courses/index.css">{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-7xl">
+    <!-- Page heading and the primary action for creating a course. -->
+    <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-600">Your learning space</p>
+            <h1 class="mt-1 text-2xl font-semibold tracking-tight text-slate-900">Courses</h1>
+            <p class="mt-2 text-sm text-slate-500">Keep each course, task, and note in one focused workspace.</p>
+        </div>
+        <a href="/courses/new"
+            class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-700">
+            <i data-lucide="plus" class="h-4 w-4"></i>
+            Create course
+        </a>
+    </div>
+    <!-- Search and sort controls are handled by courses_index.js. -->
+    <div class="mt-5 flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:items-center">
+        <div class="relative w-full max-w-md">
+            <i data-lucide="search" class="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"></i>
+            <input id="course-search" type="search" aria-label="Search courses" placeholder="Search courses..."
+                class="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-700 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100">
+        </div>
+        <label class="flex items-center gap-2 text-sm text-slate-500 sm:ml-auto">
+            <span>Sort by</span>
+            <select id="course-sort" aria-label="Sort courses"
+                class="rounded-lg border border-slate-200 bg-white py-2.5 pl-3 pr-8 text-sm font-medium text-slate-700 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100">
+                <option value="recent">Recently added</option>
+                <option value="title">Title: A-Z</option>
+                <option value="progress">Progress</option>
+                <option value="tasks">Most tasks</option>
+            </select>
+        </label>
+    </div>
+
+    <!-- Course cards are loaded from the API and rendered by courses_index.js. -->
+    <div id="course-grid" class="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <!-- Keep course creation available after the list of existing courses. -->
+        <a href="/courses/new"
+            class="flex min-h-[220px] h-full flex-col items-center justify-center rounded-xl border-2 border-dashed border-brand-200 bg-brand-50 p-5 text-center transition-colors hover:border-brand-400 hover:bg-brand-100"
+            aria-label="Create a new course">
+            <span
+                class="flex h-12 w-12 items-center justify-center rounded-full border-2 border-brand-500 bg-brand-100 text-brand-600 shadow-sm transition-all duration-200 hover:bg-brand-500 hover:text-white hover:shadow-md">
+                <i data-lucide="plus" class="h-6 w-6"></i>
+            </span>
+            <span class="mt-4 text-lg font-semibold text-slate-900">Create new course</span>
+            <span class="mt-2 max-w-[220px] text-sm leading-5 text-slate-700">
+                Add a new course to organise your learning and track your progress.
+            </span>
+            <span class="mt-4 flex items-center gap-1 text-sm font-semibold text-brand-700">
+                <i data-lucide="plus" class="h-4 w-4"></i>
+                Create course
+            </span>
+        </a>
+    </div>
+
+</section>
+
+<!-- Toast messages report client-side actions such as deletion results. -->
+<div id="course-toast" class="pointer-events-none fixed bottom-6 right-6 z-[60] hidden w-[min(100vw-3rem,380px)]"
+    role="status" aria-live="polite">
+    <div id="course-toast-content"
+        class="pointer-events-auto flex items-start gap-3 rounded-xl border px-4 py-3 shadow-lg">
+        <i id="course-toast-icon" data-lucide="circle-check" class="mt-0.5 h-5 w-5 shrink-0"></i>
+        <p id="course-toast-message" class="text-sm font-medium"></p>
+        <button type="button" id="course-toast-close"
+            class="ml-auto shrink-0 rounded-md p-0.5 opacity-70 hover:opacity-100" aria-label="Dismiss message"><i
+                data-lucide="x" class="h-4 w-4"></i></button>
+    </div>
+</div>
+
+<!-- Confirmation dialog prevents accidental course deletion. -->
+<div id="delete-confirmation" class="fixed inset-0 z-[70] hidden items-center justify-center bg-slate-950/40 px-4"
+    role="dialog" aria-modal="true" aria-labelledby="delete-confirmation-title">
+    <div class="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
+        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-red-50 text-red-600"><i
+                data-lucide="trash-2" class="h-5 w-5"></i></div>
+        <h2 id="delete-confirmation-title" class="mt-4 text-lg font-semibold text-slate-900">Delete course?</h2>
+        <p id="delete-confirmation-message" class="mt-2 text-sm leading-6 text-slate-500">This action cannot be undone.
+        </p>
+        <div class="mt-6 flex justify-end gap-3"><button type="button" id="delete-cancel"
+                class="rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100">Cancel</button><button
+                type="button" id="delete-confirm"
+                class="rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700">Yes,
+                delete</button></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Page-specific behavior for filtering, sorting, deletion, and notifications. -->
+<script src="/static/js/courses_index.js?v=2"></script>
+{% endblock %}

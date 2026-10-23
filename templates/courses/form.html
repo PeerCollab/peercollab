@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }} | PeerCollab{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="/static/css/courses/form.css">{% endblock %}
+
+{% block pages %}
+<!-- Breadcrumb identifies the current create or edit page. -->
+<div class="flex items-center gap-2 text-sm">
+    <a href="/courses" class="text-slate-400 transition-colors hover:text-brand-600">Courses</a>
+    <i data-lucide="chevron-right" class="h-4 w-4 text-slate-300"></i>
+    <span class="font-medium text-slate-700">{{ page_title }}</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<section class="max-w-5xl">
+    <!-- Return to the course list without submitting the form. -->
+    <a href="/courses"
+        class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-brand-600 hover:text-brand-700">
+        <i data-lucide="arrow-left" class="h-3.5 w-3.5"></i> All courses
+    </a>
+
+    <div class="mt-8 grid gap-12 lg:grid-cols-[minmax(0,2fr)_minmax(220px,1fr)]">
+        <div>
+            <!-- The heading and copy change depending on whether this is create or edit mode. -->
+            <div class="flex items-start gap-4">
+                <span
+                    class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600 ring-1 ring-brand-100">
+                    <i data-lucide="book-open" class="h-5 w-5"></i>
+                </span>
+                <div>
+                    <h1 class="text-2xl font-semibold tracking-tight text-slate-900">{{ "Create a new course" if
+                        form_mode == "create" else "Edit course" }}</h1>
+                    <p class="mt-2 text-sm leading-6 text-slate-500">{{ "Set up a focused workspace for your notes,
+                        tasks, and study progress." if form_mode == "create" else "Keep your course details current.
+                        Your tasks and notes will stay attached." }}</p>
+                </div>
+            </div>
+
+            <!-- course_form.js handles loading edit data, validation, and submission. -->
+            <form id="course-form" data-mode="{{ form_mode }}" data-course-id="{{ course_id|default('') }}"
+                class="mt-10">
+                <div id="form-error"
+                    class="mb-6 hidden rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"></div>
+                <div class="space-y-6">
+                    <label class="block">
+                        <span class="text-sm font-semibold text-slate-700">Course name <span
+                                class="text-red-500">*</span></span>
+                        <input id="course-title" name="title" type="text" required maxlength="50" autocomplete="off"
+                            placeholder="e.g. Human Computer Interaction"
+                            class="mt-2 w-full rounded-lg border border-slate-200 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100">
+                        <span class="mt-1.5 block text-xs text-slate-400">Use a name you will recognise quickly in your
+                            course list.</span>
+                    </label>
+                    <label class="block">
+                        <span class="text-sm font-semibold text-slate-700">Description <span
+                                class="font-normal text-slate-400">(optional)</span></span>
+                        <textarea id="course-description" name="description" rows="5" maxlength="500"
+                            placeholder="What are you learning in this course?"
+                            class="mt-2 w-full resize-y rounded-lg border border-slate-200 px-4 py-3 text-sm leading-6 text-slate-800 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"></textarea>
+                        <span class="mt-1.5 flex justify-between text-xs text-slate-400"><span>A short description helps
+                                keep this workspace easy to scan.</span><span id="description-count">0 /
+                                500</span></span>
+                    </label>
+                </div>
+                <div class="mt-8 flex flex-col gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:items-center">
+                    <button id="submit-course" type="submit"
+                        class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60">
+                        <i data-lucide="check" class="h-4 w-4"></i><span>{{ "Create course" if form_mode == "create"
+                            else "Save changes" }}</span>
+                    </button>
+                    <a href="/courses"
+                        class="inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100">Cancel</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Supporting information explains what the course workspace provides. -->
+        <aside class="border-l border-slate-200 pl-8 lg:mt-1">
+            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-600">Course workspace</p>
+            <h2 class="mt-3 text-lg font-semibold text-slate-900">A clearer place to study</h2>
+            <p class="mt-2 text-sm leading-6 text-slate-500">{{ "Once created, this course will have its own space for
+                tasks, notes, and progress." if form_mode == "create" else "Your existing tasks, notes, and progress
+                will remain connected to this course." }}</p>
+            <div class="mt-8 space-y-5">
+                <div class="flex items-start gap-3"><span
+                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
+                        <i data-lucide="check-square" class="h-4 w-4"></i></span>
+                    <div>
+                        <p class="text-sm font-semibold text-slate-700">Track tasks</p>
+                        <p class="mt-1 text-xs leading-5 text-slate-400">Keep deadlines and priorities together.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3"><span
+                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sky-50 text-sky-600"> <i
+                            data-lucide="file-text" class="h-4 w-4"></i></span>
+                    <div>
+                        <p class="text-sm font-semibold text-slate-700">Save notes</p>
+                        <p class="mt-1 text-xs leading-5 text-slate-400">Capture ideas where you can find them.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3"><span
+                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
+                        <i data-lucide="chart-no-axes-column-increasing" class="h-4 w-4"></i></span>
+                    <div>
+                        <p class="text-sm font-semibold text-slate-700">See progress</p>
+                        <p class="mt-1 text-xs leading-5 text-slate-400">Know what is complete at a glance.</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+</section>
+
+<!-- Toast displays success and error feedback from form actions. -->
+<div id="course-form-toast"
+    class="pointer-events-none fixed bottom-6 right-6 z-50 hidden w-[min(380px,calc(100vw-3rem))]" role="status"
+    aria-live="polite">
+    <div id="course-form-toast-content"
+        class="pointer-events-auto flex items-start gap-3 rounded-xl border px-4 py-3 shadow-lg">
+        <i id="course-form-toast-icon" data-lucide="circle-check" class="mt-0.5 h-5 w-5 shrink-0"></i>
+        <p id="course-form-toast-message" class="text-sm font-medium"></p>
+        <button type="button" id="course-form-toast-close"
+            class="ml-auto shrink-0 rounded-md p-0.5 opacity-70 hover:opacity-100" aria-label="Dismiss message"><i
+                data-lucide="x" class="h-4 w-4"></i></button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Page-specific form behavior. -->
+<script src="/static/js/course_form.js?v=1"></script>{% endblock %}

@@ -1,0 +1,303 @@
+{% extends "base.html" %}
+{% block title %}Projects - PeerCollab{% endblock %}
+
+{% block content %}
+{% set field = "mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100" %}
+{% set solid = "inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-brand-700 hover:shadow-lg" %}
+{% set outline = "inline-flex items-center gap-2 rounded-xl border border-brand-600 bg-white px-5 py-3 text-sm font-semibold text-brand-600 transition duration-200 hover:-translate-y-0.5 hover:bg-brand-50 hover:shadow-md" %}
+
+<!-- PAGE HEADER -->
+<section class="mx-auto max-w-7xl">
+<div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-600">
+            Your collaborative workspace
+        </p>
+    <h1 class="mt-1 text-2xl font-semibold tracking-tight text-slate-900">
+        Projects
+    </h1>
+    <p class="mt-2 text-sm text-slate-500">
+        Plan your work, track progress, and collaborate with your peers.
+    </p>
+</div>
+<div class="flex gap-3">
+    <button id="join-btn" type="button" class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50">
+        <i data-lucide="users" class="h-4 w-4"></i>
+        Join a project
+    </button>
+    <a href="/projects/new" class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-700">
+        <i data-lucide="plus" class="h-4 w-4"></i>
+        Create project
+    </a>
+</div>
+</div>
+<!-- SUCCESS MESSAGE -->
+<div id="flash"
+     role="status"
+     aria-live="polite"
+     class="mb-4 hidden rounded-xl bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
+</div>
+<!-- GENERAL ERROR MESSAGE -->
+<div id="project-error"
+     role="alert"
+     aria-live="assertive"
+     class="mb-4 hidden rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+</div>
+<!-- SEARCH AND SORT -->
+<div class="mt-5 flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:items-center">
+    <div class="relative w-full max-w-md">
+        <i data-lucide="search"
+           class="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"></i>
+    <input id="search-input"
+           type="text"
+           placeholder="Search projects..."
+           class="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-700 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100">
+</div>
+<label class="flex items-center gap-2 text-sm text-slate-500 sm:ml-auto">
+    <span>Sort by</span>
+    <select id="sort-select"
+            aria-label="Sort projects"
+            class="rounded-lg border border-slate-200 bg-white py-2.5 pl-3 pr-8 text-sm font-medium text-slate-700 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100">
+        <option value="recent">Recently added</option>
+        <option value="name">Name (A-Z)</option>
+        <option value="deadline">Deadline (soonest)</option>
+    </select>
+</label>
+</div>
+<!-- PROJECT CARDS -->
+<div id="project-grid" class="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+    <a href="/projects/new"
+       class="flex min-h-[220px] h-full flex-col items-center justify-center rounded-xl border-2 border-dashed border-brand-200 bg-brand-50 p-5 text-center transition-colors hover:border-brand-400 hover:bg-brand-100"
+       aria-label="Create a new project">
+        <span class="flex h-12 w-12 items-center justify-center rounded-full border-2 border-brand-500 bg-brand-100 text-brand-600 shadow-sm transition-all duration-200 hover:bg-brand-500 hover:text-white hover:shadow-md">
+            <i data-lucide="plus" class="h-6 w-6"></i>
+        </span>
+        <span class="mt-4 text-lg font-semibold text-slate-900">Create new project</span>
+        <span class="mt-2 max-w-[220px] text-sm leading-5 text-slate-700">
+            Start a project to organise your work and collaborate with your team.
+        </span>
+        <span class="mt-4 flex items-center gap-1 text-sm font-semibold text-brand-700">
+            <i data-lucide="plus" class="h-4 w-4"></i>
+            Create project
+        </span>
+    </a>
+</div>
+</section>
+<!-- ================================================== -->
+<!-- EDIT PROJECT MODAL -->
+<!-- ================================================== -->
+<div id="edit-modal"
+     class="fixed inset-0 z-50 hidden items-center justify-center overflow-y-auto bg-slate-900/40 p-4">
+<form id="edit-form"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="edit-title"
+      class="my-auto w-full max-w-lg space-y-4 rounded-2xl bg-white p-6 shadow-xl">
+    <!-- MODAL HEADER -->
+    <div class="flex items-center justify-between">
+        <h2 id="edit-title" class="text-lg font-semibold text-slate-900">
+            Edit project
+        </h2>
+        <button type="button"
+                class="close-modal rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                aria-label="Close edit project dialog">
+            <i data-lucide="x" class="h-4 w-4"></i>
+        </button>
+    </div>
+    <!-- PROJECT NAME -->
+    <div>
+        <label for="edit-name"
+               class="block text-sm font-medium text-slate-700">
+            Project name
+        </label>
+        <input id="edit-name"
+               name="name"
+               type="text"
+               required
+               maxlength="100"
+               class="{{ field }}">
+    </div>
+    <!-- PROJECT DESCRIPTION -->
+    <div>
+        <label for="edit-description"
+               class="block text-sm font-medium text-slate-700">
+            Description
+        </label>
+        <textarea id="edit-description"
+                  name="description"
+                  rows="3"
+                  class="{{ field }}"></textarea>
+    </div>
+    <!-- PROJECT TYPE AND STATUS -->
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+            <label for="edit-type"
+                   class="block text-sm font-medium text-slate-700">
+                Project type
+            </label>
+            <select id="edit-type"
+                    name="type"
+                    class="{{ field }}">
+                <option value="Solo">Solo</option>
+                <option value="Group">Group</option>
+            </select>
+        </div>
+        <div>
+            <label for="edit-status"
+                   class="block text-sm font-medium text-slate-700">
+                Status
+            </label>
+            <select id="edit-status"
+                    name="status"
+                    class="{{ field }}">
+                <option value="Ongoing">Ongoing</option>
+                <option value="Completed">Completed</option>
+            </select>
+        </div>
+    </div>
+    <!-- PROJECT DEADLINE -->
+    <div>
+        <label for="edit-deadline"
+               class="block text-sm font-medium text-slate-700">
+            Deadline (optional)
+        </label>
+        <input id="edit-deadline"
+               name="deadline"
+               type="date"
+               class="{{ field }}">
+    </div>
+    <!-- EDIT ERROR MESSAGE -->
+    <p id="edit-error"
+       role="alert"
+       aria-live="assertive"
+       class="hidden text-sm text-red-600">
+    </p>
+    <!-- MODAL BUTTONS -->
+    <div class="flex justify-end gap-3 pt-2">
+        <button type="button"
+                class="close-modal rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">
+            Cancel
+        </button>
+        <button id="edit-save-btn"
+                type="submit"
+                class="{{ solid }}">
+            Save changes
+        </button>
+    </div>
+</form>
+</div>
+<!-- ================================================== -->
+<!-- DELETE CONFIRMATION MODAL -->
+<!-- ================================================== -->
+<div id="delete-modal"
+     class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 p-4">
+<div role="dialog"
+     aria-modal="true"
+     aria-labelledby="delete-title"
+     aria-describedby="delete-description"
+     class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+    <!-- DELETE ICON AND TITLE -->
+    <div class="flex items-start gap-4">
+        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600">
+            <i data-lucide="trash-2" class="h-5 w-5"></i>
+        </div>
+        <div>
+            <h2 id="delete-title"
+                class="text-lg font-semibold text-slate-900">
+                Delete project?
+            </h2>
+            <p id="delete-description"
+               class="mt-2 text-sm leading-6 text-slate-500">
+                Are you sure you want to delete this project? This action cannot be undone.
+            </p>
+        </div>
+    </div>
+    <!-- DELETE ERROR MESSAGE -->
+    <p id="delete-error"
+       role="alert"
+       aria-live="assertive"
+       class="mt-4 hidden text-sm text-red-600">
+    </p>
+    <!-- DELETE BUTTONS -->
+    <div class="mt-6 flex justify-end gap-3">
+        <button id="delete-cancel-btn"
+                type="button"
+                class="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">
+            Cancel
+        </button>
+        <button id="delete-confirm-btn"
+                type="button"
+                class="inline-flex items-center gap-2 rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700">
+            <i data-lucide="trash-2" class="h-4 w-4"></i>
+            Delete project
+        </button>
+    </div>
+</div>
+</div>
+<!-- ================================================== -->
+<!-- JOIN PROJECT MODAL -->
+<!-- ================================================== -->
+<div id="join-modal"
+     class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 p-4">
+<form id="join-form"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="join-title"
+      class="w-full max-w-md space-y-4 rounded-2xl bg-white p-6 shadow-xl">
+    <!-- MODAL HEADER -->
+    <div class="flex items-center justify-between">
+        <h2 id="join-title"
+            class="text-lg font-semibold text-slate-900">
+            Join a project
+        </h2>
+        <button type="button"
+                class="close-modal rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                aria-label="Close join project dialog">
+            <i data-lucide="x" class="h-4 w-4"></i>
+        </button>
+    </div>
+    <p class="text-sm text-slate-500">
+        Enter the 8-character invite code your teammate shared with you.
+    </p>
+    <!-- INVITE CODE -->
+    <input id="join-code"
+           name="invite_code"
+           type="text"
+           maxlength="8"
+           minlength="8"
+           required
+           autocomplete="off"
+           placeholder="e.g. AB12CD34"
+           class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-center font-mono text-lg uppercase tracking-widest focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100">
+    <!-- JOIN ERROR MESSAGE -->
+    <p id="join-msg"
+       role="status"
+       aria-live="polite"
+       class="hidden text-sm">
+    </p>
+    <!-- MODAL BUTTONS -->
+    <div class="flex justify-end gap-3 pt-2">
+        <button type="button"
+                class="close-modal rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">
+            Cancel
+        </button>
+        <button id="join-submit-btn"
+                type="submit"
+                class="{{ solid }}">
+            Join project
+        </button>
+    </div>
+</form>
+</div>
+
+{% endblock %}
+
+<!-- ================================================== -->
+<!-- EXTERNAL JAVASCRIPT -->
+<!-- ================================================== -->
+
+{% block scripts %}
+
+<script src="/static/js/projects.js?v=6" defer></script>
+
+{% endblock %}
