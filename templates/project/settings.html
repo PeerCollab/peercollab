@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Project settings | PeerCollab{% endblock %}
+
+{% block pages %}
+<div class="flex items-center gap-2 text-sm">
+    <a href="/projects" class="text-slate-400 transition-colors hover:text-brand-600">Projects</a>
+    <i data-lucide="chevron-right" class="h-4 w-4 text-slate-300"></i>
+    <a href="/projects/{{ project_id }}" class="text-slate-400 transition-colors hover:text-brand-600">Project</a>
+    <i data-lucide="chevron-right" class="h-4 w-4 text-slate-300"></i>
+    <span class="font-medium text-slate-700">Project settings</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-5xl">
+    <a href="/projects/{{ project_id }}"
+        class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-brand-600 hover:text-brand-700">
+        <i data-lucide="arrow-left" class="h-3.5 w-3.5"></i> Back to project
+    </a>
+
+    <div class="mt-8 grid gap-12 lg:grid-cols-[minmax(0,2fr)_minmax(220px,1fr)]">
+        <div>
+            <div class="flex items-start gap-4">
+                <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600 ring-1 ring-brand-100">
+                    <i data-lucide="folder-kanban" class="h-5 w-5"></i>
+                </span>
+                <div>
+                    <h1 class="text-2xl font-semibold tracking-tight text-slate-900">Project settings</h1>
+                    <p class="mt-2 text-sm leading-6 text-slate-500">Update your project details. Your board and collaboration space will stay connected.</p>
+                </div>
+            </div>
+
+            <form id="project-settings-form" data-project-id="{{ project_id }}" class="mt-10">
+                <div id="project-settings-error" role="alert" aria-live="assertive"
+                    class="mb-6 hidden rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"></div>
+                <div class="space-y-6">
+                    <label class="block">
+                        <span class="text-sm font-semibold text-slate-700">Project name <span class="text-red-500">*</span></span>
+                        <input id="settings-project-name" type="text" required maxlength="100" autocomplete="off"
+                            placeholder="e.g. Design portfolio"
+                            class="mt-2 w-full rounded-lg border border-slate-200 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100">
+                    </label>
+                    <label class="block">
+                        <span class="text-sm font-semibold text-slate-700">Description <span class="font-normal text-slate-400">(optional)</span></span>
+                        <textarea id="settings-project-description" rows="5"
+                            placeholder="What is this project about?"
+                            class="mt-2 w-full resize-y rounded-lg border border-slate-200 px-4 py-3 text-sm leading-6 text-slate-800 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"></textarea>
+                    </label>
+                    <div class="grid gap-6 sm:grid-cols-2">
+                        <label class="block">
+                            <span class="text-sm font-semibold text-slate-700">Project type</span>
+                            <select id="settings-project-type"
+                                class="mt-2 w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100">
+                                <option value="Solo">Solo</option>
+                                <option value="Group">Group</option>
+                            </select>
+                        </label>
+                        <label class="block">
+                            <span class="text-sm font-semibold text-slate-700">Status</span>
+                            <select id="settings-project-status"
+                                class="mt-2 w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100">
+                                <option value="Ongoing">Ongoing</option>
+                                <option value="Completed">Completed</option>
+                            </select>
+                        </label>
+                    </div>
+                    <label class="block">
+                        <span class="text-sm font-semibold text-slate-700">Deadline <span class="font-normal text-slate-400">(optional)</span></span>
+                        <input id="settings-project-deadline" type="date"
+                            class="mt-2 w-full rounded-lg border border-slate-200 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100">
+                    </label>
+                </div>
+                <div class="mt-8 flex flex-col gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:items-center">
+                    <button id="save-project-settings" type="submit"
+                        class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60">
+                        <i data-lucide="check" class="h-4 w-4"></i><span>Save changes</span>
+                    </button>
+                    <a href="/projects/{{ project_id }}"
+                        class="inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100">Cancel</a>
+                </div>
+            </form>
+        </div>
+
+        <aside class="border-l border-slate-200 pl-8 lg:mt-1">
+            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-600">Project workspace</p>
+            <h2 class="mt-3 text-lg font-semibold text-slate-900">Keep everything in sync</h2>
+            <p class="mt-2 text-sm leading-6 text-slate-500">Your project settings update the details shown across the overview and workspace.</p>
+            <div class="mt-8 space-y-5">
+                <div class="flex items-start gap-3">
+                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
+                        <i data-lucide="layout-dashboard" class="h-4 w-4"></i>
+                    </span>
+                    <p class="pt-1 text-sm leading-5 text-slate-600">Your overview and project board stay connected.</p>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sky-50 text-sky-600">
+                        <i data-lucide="users" class="h-4 w-4"></i>
+                    </span>
+                    <p class="pt-1 text-sm leading-5 text-slate-600">Group projects keep their invite code when you update details.</p>
+                </div>
+            </div>
+        </aside>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/project_settings.js?v=1" defer></script>
+{% endblock %}
