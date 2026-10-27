@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Query, WebSocketException
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from sqlalchemy import select
@@ -43,3 +43,14 @@ def get_owned_course(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course not found")
 
     return course
+
+def get_current_user_ws(
+    token: str = Query(...),  # token comes from ?token=... instead of the header
+    db: Session = Depends(get_db),
+) -> User:
+    print("WS dependency reached")
+    try:
+        return get_current_user(token=token, db=db)  # reuse your existing logic as a normal function call
+    except HTTPException:  # your function raises 401 for a bad token
+        print("WS dependency reached")
+        raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION)  # a WebSocket can't send a 401, so close with 1008
