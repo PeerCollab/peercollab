@@ -11,7 +11,7 @@ load_dotenv()
 
 from app.database import Base
 # import the model files here
-from app.models import user, course, course_note, course_task, project  # noqa: F401
+from app.models import user, course, course_note, course_task, project, notification, chat, project_member  
 # ex: from app.models import user
 
 # this is the Alembic Config object, which provides
