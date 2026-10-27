@@ -1,1 +1,45 @@
 {% extends "project/project_base.html" %}
+
+{% block project_content %}
+<section id="chat-panel" class="relative mt-6 flex h-[calc(100vh-15rem)] min-h-[32rem] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm" data-project-id="{{ project_id }}">
+    <header class="flex flex-col gap-4 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex min-w-0 items-center gap-3">
+            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600"><i data-lucide="messages-square" class="h-5 w-5"></i></div>
+            <div class="min-w-0">
+                <h2 class="truncate text-lg font-semibold text-slate-900">Project chat</h2>
+                <div class="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-slate-400">
+                    <span id="chat-project-name">Project conversation</span><span class="text-slate-300">•</span>
+                    <span class="inline-flex items-center gap-1.5"><span id="connection-dot" class="h-2 w-2 rounded-full bg-slate-300"></span><span id="connection-label">Connecting...</span></span>
+                </div>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <label class="relative"><span class="sr-only">Search messages</span><i data-lucide="search" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"></i><input id="message-search" type="search" placeholder="Search messages" class="w-full rounded-lg border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm text-slate-700 outline-none transition focus:border-brand-300 focus:ring-2 focus:ring-brand-100 sm:w-48"></label>
+        </div>
+    </header>
+    <div id="chat-error" role="alert" aria-live="assertive" class="mx-5 mt-4 hidden rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"></div>
+    <div id="messages" role="log" aria-live="polite" aria-label="Project messages" class="relative flex-1 overflow-y-auto bg-slate-50/60 px-4 py-5 sm:px-7">
+        <div id="empty-chat" class="flex h-full min-h-64 flex-col items-center justify-center text-center">
+            <span class="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-50 text-brand-600"><i data-lucide="message-circle" class="h-7 w-7"></i></span>
+            <h3 class="mt-4 font-semibold text-slate-800">Start the conversation</h3>
+            <p class="mt-1 max-w-xs text-sm leading-6 text-slate-400">Share an update, ask a question, or keep your teammates in the loop.</p>
+        </div>
+    </div>
+    <button id="scroll-latest" type="button" class="absolute bottom-28 right-7 hidden inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-brand-700 shadow-lg transition hover:bg-brand-50" aria-label="Scroll to latest messages"><i data-lucide="arrow-down" class="h-3.5 w-3.5"></i><span>New messages</span></button>
+    <footer class="border-t border-slate-100 bg-white p-4 sm:p-5">
+        <form id="chat-form" class="flex items-start gap-3">
+            <div class="min-w-0 flex-1">
+                <label for="message-input" class="sr-only">Write a message</label>
+                <textarea id="message-input" rows="1" maxlength="2000" autocomplete="off" placeholder="Write a message..." class="max-h-32 min-h-11 w-full resize-none overflow-y-hidden rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-5 text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-brand-300 focus:bg-white focus:ring-2 focus:ring-brand-100"></textarea>
+                <div class="mt-1 flex justify-between px-1 text-[11px] text-slate-400"><span>Press Enter to send · Shift + Enter for a new line</span><span id="character-count">0 / 2000</span></div>
+            </div>
+            <button id="send-message" type="submit" disabled class="inline-flex h-11 shrink-0 items-center gap-2 rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"><i data-lucide="send" class="h-4 w-4"></i><span class="hidden sm:inline">Send</span></button>
+        </form>
+    </footer>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/project_detail.js?v=2" defer></script>
+<script src="/static/js/chat.js?v=7" defer></script>
+{% endblock %}
