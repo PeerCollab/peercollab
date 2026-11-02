@@ -288,10 +288,13 @@
     const statusClass =
       String(status).toLowerCase() === "completed"
         ? "bg-green-50 text-green-700"
-        : "bg-blue-50 text-blue-700";
+        : "bg-brand-50 text-brand-700";
 
     return `
-            <article class="project-card flex min-h-[250px] h-full flex-col rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-md"
+            <article class="project-card flex min-h-[250px] h-full flex-col rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-brand-500"
+                     role="link"
+                     tabindex="0"
+                     aria-label="Open project ${safeName}"
                      data-project-id="${safeId}"
                      data-project-name="${safeName}"
                      data-project-deadline="${escapeHtml(deadline)}">
@@ -722,6 +725,7 @@
     const editButton = event.target.closest(".edit-btn");
     const deleteButton = event.target.closest(".delete-btn");
     const viewButton = event.target.closest(".view-btn");
+    const projectCard = event.target.closest(".project-card");
 
     if (editButton) {
       openEdit(editButton.dataset.id);
@@ -734,16 +738,22 @@
     }
 
     if (viewButton) {
-      /*
-       * The actual project-details route has not yet been confirmed.
-       * We display a friendly message instead of navigating to a
-       * made-up URL.
-       */
-      showMessage(
-        projectError,
-        "The project details page is not connected yet."
-      );
+      window.location.href = `/projects/${encodeURIComponent(viewButton.dataset.id)}`;
+      return;
     }
+
+    if (projectCard && !event.target.closest("button")) {
+      window.location.href = `/projects/${encodeURIComponent(projectCard.dataset.projectId)}`;
+    }
+  });
+
+  projectGrid?.addEventListener("keydown", event => {
+    const projectCard = event.target.closest(".project-card");
+    if (!projectCard || event.target.closest("button")) return;
+    if (event.key !== "Enter" && event.key !== " ") return;
+
+    event.preventDefault();
+    window.location.href = `/projects/${encodeURIComponent(projectCard.dataset.projectId)}`;
   });
 
   // ==========================================

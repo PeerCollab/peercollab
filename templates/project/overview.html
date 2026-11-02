@@ -1,0 +1,134 @@
+{% extends "project/project_base.html" %}
+
+{% block project_content %}
+<div class="grid gap-4 sm:grid-cols-3">
+    <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="flex items-center justify-between">
+            <span class="text-sm font-medium text-slate-500">Project status</span>
+            <i data-lucide="circle-check" class="h-4 w-4 text-brand-600"></i>
+        </div>
+        <strong id="overview-status" class="mt-3 block text-2xl font-semibold text-slate-900">Loading...</strong>
+        <p class="mt-1 text-xs text-slate-400">Current project status</p>
+    </section>
+    <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="flex items-center justify-between">
+            <span class="text-sm font-medium text-slate-500">Project type</span>
+            <i data-lucide="users" class="h-4 w-4 text-brand-600"></i>
+        </div>
+        <strong id="overview-type" class="mt-3 block text-2xl font-semibold text-slate-900">Loading...</strong>
+        <p class="mt-1 text-xs text-slate-400">Who this project is for</p>
+    </section>
+    <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="flex items-center justify-between">
+            <span class="text-sm font-medium text-slate-500">Deadline</span>
+            <i data-lucide="calendar-clock" class="h-4 w-4 text-amber-500"></i>
+        </div>
+        <strong id="overview-deadline" class="mt-3 block text-2xl font-semibold text-slate-900">Not set</strong>
+        <p class="mt-1 text-xs text-slate-400">Project target date</p>
+    </section>
+</div>
+
+<div class="mt-6 grid gap-6 lg:grid-cols-2">
+    <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="flex items-start justify-between gap-4">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.14em] text-brand-600">Overview</p>
+                <h2 class="mt-1 text-lg font-semibold text-slate-900">Project status</h2>
+            </div>
+            <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-500">1 project</span>
+        </div>
+        <div class="mt-7 flex flex-col items-center gap-6 sm:flex-row sm:justify-center">
+            <div id="project-status-chart" role="img" aria-label="Project status distribution"
+                class="relative flex h-32 w-32 shrink-0 items-center justify-center rounded-full"
+                style="background: conic-gradient(#6C4EF5 0deg 360deg)">
+                <div class="absolute inset-3 flex items-center justify-center rounded-full bg-white">
+                    <span class="text-2xl font-bold text-slate-900">1</span>
+                </div>
+            </div>
+            <div id="project-status-legend" class="grid w-full max-w-48 gap-3 text-sm">
+                <div class="flex items-center gap-2">
+                    <span class="h-2.5 w-2.5 rounded-full bg-brand-600"></span>
+                    <span class="text-slate-500">Ongoing</span>
+                    <strong id="ongoing-project-count" class="ml-auto text-slate-800">0</strong>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="h-2.5 w-2.5 rounded-full bg-green-600"></span>
+                    <span class="text-slate-500">Completed</span>
+                    <strong id="completed-project-count" class="ml-auto text-slate-800">0</strong>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="rounded-xl bg-gradient-to-br from-brand-600 to-brand-700 p-6 text-white shadow-sm">
+        <i data-lucide="users-round" class="h-5 w-5 text-brand-100"></i>
+        <h2 id="collaboration-title" class="mt-5 text-lg font-semibold">Project collaboration</h2>
+        <p id="collaboration-description" class="mt-2 text-sm leading-6 text-brand-100">
+            Project collaboration details will appear here.
+        </p>
+        <div id="project-invite" class="mt-5 hidden rounded-lg border border-brand-300 bg-brand-700/40 p-4">
+            <p class="text-xs font-semibold uppercase tracking-wide text-brand-100">Invite code</p>
+            <p id="project-invite-code" class="mt-1 font-mono text-lg font-semibold tracking-wider text-white"></p>
+            <p class="mt-1 text-xs text-brand-100">Share this code with teammates to invite them.</p>
+        </div>
+        <div class="mt-6 flex flex-wrap gap-2">
+            <a href="/projects/{{ project_id }}?tab=kanban"
+                class="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-brand-700 transition hover:bg-brand-50">
+                <i data-lucide="kanban" class="h-4 w-4"></i> Open board
+            </a>
+            <a href="/projects/{{ project_id }}?tab=members"
+                class="inline-flex items-center gap-2 rounded-lg border border-brand-300 px-3 py-2 text-sm font-semibold text-white transition hover:bg-brand-700">
+                <i data-lucide="users" class="h-4 w-4"></i> View members
+            </a>
+        </div>
+    </section>
+</div>
+
+<section class="mt-8">
+    <div class="flex flex-col gap-2 border-b border-slate-200 pb-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.14em] text-brand-600">Recent activity</p>
+            <h2 class="mt-1 text-xl font-semibold text-slate-900">Keep your project moving</h2>
+        </div>
+        <p class="text-sm text-slate-400">Your latest chats and uploads in one place</p>
+    </div>
+    <div class="grid gap-8 pt-6 lg:grid-cols-2">
+        <div class="min-w-0">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
+                        <i data-lucide="list-checks" class="h-4 w-4"></i>
+                    </span>
+                    <h3 class="font-semibold text-slate-800">Latest chats</h3>
+                </div>
+                <a href="/projects/{{ project_id }}?tab=chat"
+                    class="inline-flex items-center gap-1 text-sm font-semibold text-brand-600 hover:text-brand-700">
+                    View chat <i data-lucide="arrow-up-right" class="h-3.5 w-3.5"></i>
+                </a>
+            </div>
+            <div class="mt-4 rounded-lg border border-dashed border-slate-200 px-4 py-8 text-center">
+                <p class="text-sm font-medium text-slate-600">No chats yet</p>
+                <p class="mt-1 text-xs text-slate-400">Recent project conversations will appear here.</p>
+            </div>
+        </div>
+        <div class="min-w-0 lg:border-l lg:border-slate-200 lg:pl-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-50 text-sky-600">
+                        <i data-lucide="files" class="h-4 w-4"></i>
+                    </span>
+                    <h3 class="font-semibold text-slate-800">Latest uploads</h3>
+                </div>
+                <a href="/projects/{{ project_id }}?tab=files"
+                    class="inline-flex items-center gap-1 text-sm font-semibold text-brand-600 hover:text-brand-700">
+                    View uploads <i data-lucide="arrow-up-right" class="h-3.5 w-3.5"></i>
+                </a>
+            </div>
+            <div class="mt-4 rounded-lg border border-dashed border-slate-200 px-4 py-8 text-center">
+                <p class="text-sm font-medium text-slate-600">No uploads yet</p>
+                <p class="mt-1 text-xs text-slate-400">The latest files uploaded to this project will appear here.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
