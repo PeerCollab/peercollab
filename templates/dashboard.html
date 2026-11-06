@@ -34,8 +34,8 @@
                      {{ upcoming_tasks_count }}
                 </p>
 
-                <p class="text-xs text-slate-500 mt-1">
-                    {{ due_today_count }} Due Today
+                 <p class="text-xs text-slate-500 mt-1">
+                    <span id="due-today-count">{{ due_today_count }}</span> Due Today
                 </p>
             </div>
 
@@ -110,25 +110,29 @@
     </div>
 
     <!-- Tabs -->
-    <div class="flex items-center border-b border-purple-100 px-3 overflow-x-auto">
-        <button type="button" data-task-tab="upcoming"
-            class="task-tab px-3 py-3 text-sm font-semibold bg-purple-600 text-white rounded-t-lg whitespace-nowrap">
-            Upcoming
-        </button>
-        <button type="button" data-task-tab="today" 
-            class="task-tab px-3 py-3 text-sm text-purple-700 hover:text-white hover:bg-purple-600 whitespace-nowrap">
-            Due Today
-        </button>
-        <button type="button" data-task-tab="week" 
-            class="task-tab px-3 py-3 text-sm text-purple-700 hover:text-white hover:bg-purple-600 whitespace-nowrap">
-            This Week
-        </button>
-        <button type="button" data-task-tab="overdue" 
-            class="task-tab px-3 py-3 text-sm text-purple-700 hover:text-white hover:bg-purple-600 whitespace-nowrap">
-            Overdue
-        </button>
-    </div>
+<div class="flex items-center border-b border-purple-100 px-3 overflow-x-auto">
 
+    <button type="button" data-task-tab="today"
+        class="task-tab px-3 py-3 text-sm font-semibold bg-purple-600 text-white rounded-t-lg whitespace-nowrap">
+        Due Today
+    </button>
+
+    <button type="button" data-task-tab="upcoming"
+        class="task-tab px-3 py-3 text-sm text-purple-700 hover:text-white hover:bg-purple-600 whitespace-nowrap">
+        Upcoming
+    </button>
+
+    <button type="button" data-task-tab="week"
+        class="task-tab px-3 py-3 text-sm text-purple-700 hover:text-white hover:bg-purple-600 whitespace-nowrap">
+        This Week
+    </button>
+
+    <button type="button" data-task-tab="overdue"
+        class="task-tab px-3 py-3 text-sm text-purple-700 hover:text-white hover:bg-purple-600 whitespace-nowrap">
+        Overdue
+    </button>
+
+</div>
     <!-- Upcoming -->
     <div id="task-panel-upcoming" class="task-panel divide-y divide-purple-100">
         {% for task in upcoming_tasks %}
@@ -273,7 +277,7 @@
     <!-- Header -->
     <div class="flex items-center justify-between mb-5">
 
-        <h2 class="text-base font-boldtext-slate-900">
+        <h2 class="text-base font-bold text-slate-900">
             My Projects
         </h2>
 
