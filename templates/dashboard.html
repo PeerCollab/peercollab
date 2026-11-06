@@ -1,5 +1,324 @@
 {% extends "base.html" %}
+
 {% block title %}Dashboard - PeerCollab{% endblock %}
+
 {% block content %}
-<h1 class="text-2xl font-bold text-slate-900">Dashboard (test) </h1>
+
+<!-- Dashboard Header -->
+<div class="mb-6">
+    <h1 class="text-3xl font-bold text-slate-900">Dashboard</h1>
+    <p class="mt-1 text-sm text-slate-500">
+        Welcome back! Here's what's happening today.
+    </p>
+</div>
+
+
+<!-- ==================== STATISTICS ==================== -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+
+    <!-- Upcoming Tasks -->
+    <div class="bg-white border border-purple-100 rounded-lg p-5">
+        <div class="flex items-center gap-4">
+
+            <div class="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center">
+                <i data-lucide="clipboard-list" class="w-6 h-6 text-purple-700"></i>
+            </div>
+
+            <div>
+                <p class="text-sm font-semibold text-purple-700">
+                    Upcoming Tasks
+                </p>
+
+                <p id="upcoming-tasks-count"
+                    class="text-3xl font-bold text-slate-900 mt-1">
+                     {{ upcoming_tasks_count }}
+                </p>
+
+                <p class="text-xs text-slate-500 mt-1">
+                    {{ due_today_count }} Due Today
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- Total Projects -->
+    <div class="bg-white border border-purple-100 rounded-lg p-5">
+        <div class="flex items-center gap-4">
+
+            <div class="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center">
+                <i data-lucide="folder-kanban" class="w-6 h-6 text-purple-700"></i>
+            </div>
+
+            <div>
+                <p class="text-sm font-semibold text-purple-700">
+                    Total Projects
+                </p>
+
+                <p id="total-projects-count"
+                    class="text-3xl font-bold text-slate-900 mt-1">
+                    {{ projects|length }}
+                </p>
+
+                <p class="text-xs text-slate-500 mt-1">
+                    <span id="active-projects-count">{{ projects|selectattr("status", "equalto", "Ongoing")|list|length }}</span> Active
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- Notifications -->
+    <div class="bg-white border border-purple-100 rounded-lg p-5">
+        <div class="flex items-center gap-4">
+
+            <div class="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center">
+                <i data-lucide="bell" class="w-6 h-6 text-purple-700"></i>
+            </div>
+
+            <div>
+                <p class="text-sm font-semibold text-purple-700">
+                    Total Notifications
+                </p>
+
+                <p id="total-notifications-count"
+                    class="text-3xl font-bold text-slate-900 mt-1">
+                     {{ total_notifications_count }}
+                </p>
+
+                <p class="text-xs text-slate-500 mt-1">
+                    New Updates
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+
+<!-- ==================== TASKS + OVERVIEW ==================== -->
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
+
+<!-- My Tasks -->
+<div class="xl:col-span-2 bg-white border border-purple-100 rounded-lg overflow-hidden">
+
+    <div class="flex items-center justify-between px-5 py-4 border-b border-purple-100">
+        <h2 class="text-base font-bold text-slate-900">My Tasks</h2>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex items-center border-b border-purple-100 px-3 overflow-x-auto">
+        <button type="button" data-task-tab="upcoming"
+            class="task-tab px-3 py-3 text-sm font-semibold bg-purple-600 text-white rounded-t-lg whitespace-nowrap">
+            Upcoming
+        </button>
+        <button type="button" data-task-tab="today" 
+            class="task-tab px-3 py-3 text-sm text-purple-700 hover:text-white hover:bg-purple-600 whitespace-nowrap">
+            Due Today
+        </button>
+        <button type="button" data-task-tab="week" 
+            class="task-tab px-3 py-3 text-sm text-purple-700 hover:text-white hover:bg-purple-600 whitespace-nowrap">
+            This Week
+        </button>
+        <button type="button" data-task-tab="overdue" 
+            class="task-tab px-3 py-3 text-sm text-purple-700 hover:text-white hover:bg-purple-600 whitespace-nowrap">
+            Overdue
+        </button>
+    </div>
+
+    <!-- Upcoming -->
+    <div id="task-panel-upcoming" class="task-panel divide-y divide-purple-100">
+        {% for task in upcoming_tasks %}
+        <div class="grid grid-cols-12 gap-4 px-5 py-4 items-center">
+            <div class="col-span-6">
+                <p class="text-sm font-medium text-slate-800">{{ task.title }}</p>
+                <p class="text-xs text-slate-400 mt-1">{{ task.course.title }}</p>
+            </div>
+            <div class="col-span-3 text-sm text-purple-700">{{ task.priority or "Normal" }}</div>
+            <div class="col-span-3 text-right text-xs text-slate-600">{{ task.due_date }}</div>
+        </div>
+        {% else %}
+        <div class="px-5 py-8 text-center">
+            <p class="text-sm font-semibold text-slate-700">No upcoming tasks</p>
+            <p class="text-xs text-slate-400 mt-1">Your upcoming tasks will appear here.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Due Today -->
+    <div id="task-panel-today" class="task-panel divide-y divide-purple-100" hidden>
+        {% for task in due_today_tasks %}
+        <div class="grid grid-cols-12 gap-4 px-5 py-4 items-center">
+            <div class="col-span-6">
+                <p class="text-sm font-medium text-slate-800">{{ task.title }}</p>
+                <p class="text-xs text-slate-400 mt-1">{{ task.course.title }}</p>
+            </div>
+            <div class="col-span-3 text-sm text-purple-700">{{ task.priority or "Normal" }}</div>
+            <div class="col-span-3 text-right text-xs text-slate-600">{{ task.due_date }}</div>
+        </div>
+        {% else %}
+        <div class="px-5 py-8 text-center">
+            <p class="text-sm font-semibold text-slate-700">No tasks due today</p>
+            <p class="text-xs text-slate-400 mt-1">Tasks due today will appear here.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- This Week -->
+    <div id="task-panel-week" class="task-panel divide-y divide-purple-100" hidden>
+        {% for task in this_week_tasks %}
+        <div class="grid grid-cols-12 gap-4 px-5 py-4 items-center">
+            <div class="col-span-6">
+                <p class="text-sm font-medium text-slate-800">{{ task.title }}</p>
+                <p class="text-xs text-slate-400 mt-1">{{ task.course.title }}</p>
+            </div>
+            <div class="col-span-3 text-sm text-purple-700">{{ task.priority or "Normal" }}</div>
+            <div class="col-span-3 text-right text-xs text-slate-600">{{ task.due_date }}</div>
+        </div>
+        {% else %}
+        <div class="px-5 py-8 text-center">
+            <p class="text-sm font-semibold text-slate-700">No tasks this week</p>
+            <p class="text-xs text-slate-400 mt-1">Tasks scheduled for this week will appear here.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Overdue -->
+    <div id="task-panel-overdue" class="task-panel divide-y divide-purple-100" hidden>
+        {% for task in overdue_tasks %}
+        <div class="grid grid-cols-12 gap-4 px-5 py-4 items-center">
+            <div class="col-span-6">
+                <p class="text-sm font-medium text-slate-800">{{ task.title }}</p>
+                <p class="text-xs text-slate-400 mt-1">{{ task.course.title }}</p>
+            </div>
+            <div class="col-span-3 text-sm text-red-600">{{ task.priority or "Normal" }}</div>
+            <div class="col-span-3 text-right text-xs text-red-600">{{ task.due_date }}</div>
+        </div>
+        {% else %}
+        <div class="px-5 py-8 text-center">
+            <p class="text-sm font-semibold text-slate-700">No overdue tasks</p>
+            <p class="text-xs text-slate-400 mt-1">You're all caught up! Overdue tasks will appear here.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+<!-- Task Overview -->
+<div class="bg-white border border-purple-100 rounded-lg p-5">
+
+    <h2 class="text-base font-bold text-slate-900 mb-5">
+        Task Overview
+    </h2>
+
+    <!-- Automatic Progress Chart -->
+    <div class="flex items-end justify-center gap-6 h-40 mb-5">
+
+        <!-- To Do -->
+        <div class="flex flex-col items-center justify-end h-full">
+            <div id="todo-bar" class="w-12 bg-blue-500 rounded-t-md"
+                 style="height: {{ todo_percentage }}%; min-height: 2px;">
+            </div>
+            <span class="text-xs text-slate-500 mt-2">To Do</span>
+        </div>
+
+        <!-- In Progress -->
+        <div class="flex flex-col items-center justify-end h-full">
+            <div id="in-progress-bar" class="w-12 bg-purple-500 rounded-t-md"
+                 style="height: {{ in_progress_percentage }}%; min-height: 2px;">
+            </div>
+            <span class="text-xs text-slate-500 mt-2">In Progress</span>
+        </div>
+
+        <!-- Done -->
+        <div class="flex flex-col items-center justify-end h-full">
+            <div id="done-bar" class="w-12 bg-green-500 rounded-t-md"
+                 style="height: {{ done_percentage }}%; min-height: 2px;">
+            </div>
+            <span class="text-xs text-slate-500 mt-2">Done</span>
+        </div>
+
+    </div>
+
+    <!-- Automatic Percentages -->
+    <div class="grid grid-cols-3 text-center border-t border-purple-100 pt-4">
+
+        <div>
+            <p id="todo-percentage" class="text-lg font-bold text-slate-800">{{ todo_percentage }}%</p>
+            <p class="text-xs text-slate-400">To Do</p>
+        </div>
+
+        <div>
+            <p id="in-progress-percentage" class="text-lg font-bold text-slate-800">{{ in_progress_percentage }}%</p>
+            <p class="text-xs text-slate-400">In Progress</p>
+        </div>
+
+        <div>
+            <p id="done-percentage" class="text-lg font-bold text-slate-800">{{ done_percentage }}%</p>
+            <p class="text-xs text-slate-400">Done</p>
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+
+<!-- ==================== MY PROJECTS ==================== -->
+<div class="bg-white border border-purple-100 rounded-lg p-5 mb-6">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-5">
+
+        <h2 class="text-base font-boldtext-slate-900">
+            My Projects
+        </h2>
+
+        <a href="/projects"
+           class="text-sm text-slate-500 hover:text-slate-900 flex items-center gap-1">
+            View all projects
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </a>
+    </div>
+
+    <!-- Project Cards -->
+    <div id="project-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
+
+       {% if projects %}
+    {% for project in projects %}
+    <div class="project-card">
+        <div>
+            <h3>{{ project.name }}</h3>
+            <p>{{ project.description or "No description available." }}</p>
+        </div>
+
+        <span class="project-status">
+            {{ project.status }}
+        </span>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="col-span-full px-5 py-8 text-center">
+        <p class="text-sm font-semibold text-slate-700">
+        No projects yet
+        </p>
+        <p class="text-xs text-slate-400 mt-1 whitespace-nowrap">
+        Your projects will appear here when they are available.
+        </p>
+    </div>
+
+{% endif %}
+
+    </div>
+
+</div>
+
 {% endblock %}
+
+{% block scripts %}
+<script src="/static/js/dashboard.js"></script>
+{% endblock %}
+

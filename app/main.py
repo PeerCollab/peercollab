@@ -1,29 +1,47 @@
+<<<<<<< HEAD
+=======
 from app.routers import auth, dashboard, course, course_note, course_task, projects, chat
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, Request
+>>>>>>> dev
 from pathlib import Path
-from fastapi import FastAPI
 
-app = FastAPI(debug=True)
+from fastapi import FastAPI, Request
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 
-
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
-
+from app.routers import (
+    auth,
+    dashboard,
+    course,
+    course_note,
+    course_task,
+    projects,
+)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 app = FastAPI()
+
 app.include_router(auth.router)
 app.include_router(dashboard.router)
 app.include_router(course.router)
 app.include_router(course_note.router)
 app.include_router(course_task.router)
 app.include_router(projects.router)
+<<<<<<< HEAD
+
+app.mount(
+    "/static",
+    StaticFiles(directory=BASE_DIR / "static"),
+    name="static",
+)
+
+=======
 app.include_router(chat.router)
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
+>>>>>>> dev
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 
@@ -34,6 +52,6 @@ def preview(request: Request):
         name="base.html",
         context={
             "active_page": "dashboard",
-            "page_title": "Dashboard"
-        }
+            "page_title": "Dashboard",
+        },
     )
