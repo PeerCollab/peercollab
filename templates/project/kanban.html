@@ -47,9 +47,84 @@
         {% endfor %}
     </div>
 </section>
+
+<div id="create-task-modal" data-modal
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 p-4">
+    <div class="w-full max-w-md rounded-2xl bg-white shadow-xl" role="dialog" aria-modal="true"
+        aria-labelledby="create-task-heading">
+        <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+            <h3 id="create-task-heading" class="text-base font-semibold text-slate-900">Create Task</h3>
+            <button type="button" data-close-modal="create-task-modal" aria-label="Close"
+                class="text-slate-400 transition-colors hover:text-slate-600">
+                <i data-lucide="x" class="h-5 w-5"></i>
+            </button>
+        </div>
+
+        <form id="create-task-form" novalidate class="space-y-4 px-5 py-4">
+            <div id="create-task-error" role="alert"
+                class="hidden rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"></div>
+
+            <div>
+                <label for="create-title" class="mb-1.5 block text-sm font-medium text-slate-700">
+                    Task title <span class="text-red-500">*</span>
+                </label>
+                <input id="create-title" name="title" type="text" maxlength="100" data-autofocus
+                    placeholder="Add deployment guide"
+                    class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+                <p id="create-title-error" class="mt-1 hidden text-xs text-red-600">Title is required</p>
+            </div>
+
+            <div>
+                <label for="create-description" class="mb-1.5 block text-sm font-medium text-slate-700">
+                    Description <span class="text-slate-400">(optional)</span>
+                </label>
+                <textarea id="create-description" name="description" rows="3" maxlength="2000"
+                    placeholder="Include steps for deployment..."
+                    class="w-full resize-none rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"></textarea>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label for="create-priority" class="mb-1.5 block text-sm font-medium text-slate-700">Priority</label>
+                    <select id="create-priority" name="priority"
+                        class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="create-due" class="mb-1.5 block text-sm font-medium text-slate-700">Due date</label>
+                    <input id="create-due" name="due_date" type="date"
+                        class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+                </div>
+            </div>
+
+            <div>
+                <label for="create-assignee" class="mb-1.5 block text-sm font-medium text-slate-700">Assignee</label>
+                <select id="create-assignee" name="assignee_id"
+                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    <option value="">Unassigned</option>
+                </select>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-1">
+                <button type="button" data-close-modal="create-task-modal"
+                    class="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50">
+                    Cancel
+                </button>
+                <button id="create-task-submit" type="submit"
+                    class="rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 disabled:opacity-60">
+                    Create Task
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
 <script src="/static/js/project_detail.js?v=2" defer></script>
 <script src="/static/js/kanban.js?v=1" defer></script>
+<script src="/static/js/kanban_create.js?v=1" defer></script>
 {% endblock %}
