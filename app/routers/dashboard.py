@@ -61,7 +61,7 @@ def dashboard_data(
         db.query(Project)
         .filter(Project.owner_id == current_user.id)
         .order_by(Project.created_at.desc())
-        .limit(4)
+        .limit(3)
         .all()
     )
 
