@@ -66,3 +66,9 @@ class TaskCommentOut(BaseModel):
     full_name: str
     content: str
     created_at: datetime
+
+class AssigneeOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    full_name: str    
