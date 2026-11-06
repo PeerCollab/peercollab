@@ -1,1 +1,50 @@
 {% extends "project/project_base.html" %}
+
+{% block project_content %}
+<section id="kanban-board" class="mt-6" data-project-id="{{ project_id }}">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h2 class="text-lg font-semibold text-slate-900">Kanban board</h2>
+            <p class="text-sm text-slate-400">Track project tasks from To Do to Done.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="open-filter" type="button"
+                class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:border-brand-200 hover:bg-brand-50 hover:text-brand-700">
+                <i data-lucide="filter" class="h-4 w-4"></i> Filter
+            </button>
+            <button id="open-create-task" type="button"
+                class="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-700">
+                <i data-lucide="plus" class="h-4 w-4"></i> New Task
+            </button>
+        </div>
+    </div>
+
+    <div id="kanban-error" role="alert" aria-live="assertive"
+        class="mt-4 hidden rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"></div>
+
+    <div class="mt-5 grid grid-cols-1 gap-5 md:grid-cols-3">
+        {% set columns = [
+            ("To Do", "todo", "circle", "bg-violet-50 text-violet-700"),
+            ("Doing", "doing", "loader", "bg-blue-50 text-blue-700"),
+            ("Done", "done", "circle-check", "bg-green-50 text-green-700"),
+        ] %}
+        {% for status, key, icon, tone in columns %}
+        <div class="flex min-h-[24rem] flex-col rounded-2xl border border-slate-200 bg-slate-50/60">
+            <header class="flex items-center justify-between rounded-t-2xl px-4 py-3 {{ tone }}">
+                <div class="flex items-center gap-2 text-sm font-semibold">
+                    <i data-lucide="{{ icon }}" class="h-4 w-4"></i> {{ status }}
+                </div>
+                <span id="count-{{ key }}" class="rounded-full bg-white/70 px-2 py-0.5 text-xs font-semibold">0</span>
+            </header>
+            <div class="relative flex-1 p-3">
+                <div id="list-{{ key }}" data-status="{{ status }}" class="flex min-h-[10rem] flex-col gap-3"></div>
+                <p id="empty-{{ key }}"
+                    class="pointer-events-none absolute inset-x-3 top-3 rounded-xl border border-dashed border-slate-200 px-4 py-8 text-center text-sm text-slate-400">
+                    No tasks in this column
+                </p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
