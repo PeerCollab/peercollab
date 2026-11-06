@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    showTaskTab("upcoming");
+    showTaskTab("today");
 
     async function loadDashboard() {
         const token = localStorage.getItem("access_token");
@@ -51,6 +51,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             // Update summary cards
             setText("upcoming-tasks-count", data.upcoming_tasks_count ?? 0);
+            setText("due-today-count", data.due_today_count ?? 0);
             setText("total-projects-count", data.projects.length);
             setText("active-projects-count",
                 data.projects.filter(p => p.status === "Ongoing").length);
