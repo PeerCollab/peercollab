@@ -284,6 +284,24 @@
     const safeDescription = escapeHtml(description);
     const safeType = escapeHtml(type);
     const safeStatus = escapeHtml(status);
+    const ownerActions = project.is_owner
+      ? `
+                        <button type="button"
+                                class="edit-btn flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-brand-600"
+                                data-id="${safeId}"
+                                aria-label="Edit ${safeName}"
+                                title="Edit project">
+                            <i data-lucide="pencil" class="h-4 w-4"></i>
+                        </button>
+                        <button type="button"
+                                class="delete-btn flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600"
+                                data-id="${safeId}"
+                                aria-label="Delete ${safeName}"
+                                title="Delete project">
+                            <i data-lucide="trash-2" class="h-4 w-4"></i>
+                        </button>
+                    `
+      : "";
 
     const statusClass =
       String(status).toLowerCase() === "completed"
@@ -306,25 +324,7 @@
                     </div>
 
                     <div class="flex items-center gap-1">
-
-                        <button type="button"
-                                class="edit-btn flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-brand-600"
-                                data-id="${safeId}"
-                                aria-label="Edit ${safeName}"
-                                title="Edit project">
-
-                            <i data-lucide="pencil" class="h-4 w-4"></i>
-                        </button>
-
-                        <button type="button"
-                                class="delete-btn flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600"
-                                data-id="${safeId}"
-                                aria-label="Delete ${safeName}"
-                                title="Delete project">
-
-                            <i data-lucide="trash-2" class="h-4 w-4"></i>
-                        </button>
-
+                        ${ownerActions}
                     </div>
                 </div>
 

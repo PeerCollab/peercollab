@@ -31,3 +31,15 @@ class ProjectOut(BaseModel):
     owner_id: int
     deadline: Optional[date] = None
     created_at: Optional[datetime] = None
+
+
+class ProjectListOut(ProjectOut):
+    is_owner: bool
+
+
+class ProjectJoin(BaseModel):
+    invite_code: str = Field(
+        min_length=8,
+        max_length=8,
+        pattern=r"^[A-Za-z0-9]{8}$",
+    )
