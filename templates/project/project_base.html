@@ -52,12 +52,14 @@
                 ("chat", "messages-square", "Chat"),
                 ("files", "files", "Files"),
                 ("members", "users", "Members"),
+                ("notifications", "bell", "Notifications"),
             ] %}
             {% for tab, icon, label in project_tabs %}
             <a href="/projects/{{ project_id }}?tab={{ tab }}"
                 {% if active_tab == tab %}aria-current="page"{% endif %}
                 class="inline-flex shrink-0 items-center gap-2 border-b-2 px-1 pb-3 text-sm font-semibold transition-colors {% if active_tab == tab %}border-brand-600 text-brand-600{% else %}border-transparent text-slate-400 hover:text-slate-700{% endif %}">
                 <i data-lucide="{{ icon }}" class="h-4 w-4"></i> {{ label }}
+                {% if tab == "notifications" %}<span id="project-notification-count" class="hidden rounded-full bg-brand-600 px-2 py-0.5 text-[10px] font-bold text-white"></span>{% endif %}
             </a>
             {% endfor %}
         </nav>

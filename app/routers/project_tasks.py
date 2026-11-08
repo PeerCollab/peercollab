@@ -11,6 +11,7 @@ from app.models.project_member import ProjectMember
 from app.models.project_task import ProjectTask
 from app.models.task_comment import TaskComment
 from app.models.user import User
+from app.services.notifications import add_project_notification
 from app.schemas.project_tasks import (
     AssigneeOut,
     ProjectTaskCreate,
@@ -156,6 +157,14 @@ def create_task(
         created_by_id=current_user.id,
     )
     db.add(task)
+    add_project_notification(
+        db,
+        project_id=project_id,
+        user_id=task.assignee_id,
+        actor_id=current_user.id,
+        type="task_assigned",
+        message=f'You were assigned to "{task.title}" in {project.name}.',
+    )
     db.commit()
     db.refresh(task)
     return task
@@ -172,6 +181,8 @@ def update_task(
     project = get_project_for_member(project_id, db, current_user)
     task = get_task_in_project(db, project_id, task_id)
     data = task_in.model_dump(exclude_unset=True)
+    previous_assignee_id = task.assignee_id
+    previous_status = task.status
 
     if "title" in data and data["title"] is not None and not data["title"].strip():
         raise HTTPException(status_code=400, detail="Title is required")
@@ -192,6 +203,30 @@ def update_task(
         task.status = new_status
         task.position = next_position(db, project_id, new_status)
 
+    if task.assignee_id != previous_assignee_id:
+        add_project_notification(
+            db,
+            project_id=project_id,
+            user_id=task.assignee_id,
+            actor_id=current_user.id,
+            type="task_assigned",
+            message=f'You were assigned to "{task.title}" in {project.name}.',
+        )
+    if task.status != previous_status:
+        message = (
+            f'{current_user.full_name} moved "{task.title}" to '
+            f"{task.status} in {project.name}."
+        )
+        for recipient_id in {task.created_by_id, task.assignee_id}:
+            add_project_notification(
+                db,
+                project_id=project_id,
+                user_id=recipient_id,
+                actor_id=current_user.id,
+                type="task_status_changed",
+                message=message,
+            )
+
     db.commit()
     db.refresh(task)
     return task
@@ -205,7 +240,7 @@ def move_task(
     db: DbSession,
     current_user: CurrentUser,
 ):
-    get_project_for_member(project_id, db, current_user)
+    project = get_project_for_member(project_id, db, current_user)
     task = get_task_in_project(db, project_id, task_id)
 
     old_status = task.status
@@ -218,6 +253,19 @@ def move_task(
 
     if old_status != new_status:
         renumber(column_tasks(db, project_id, old_status, task.id))
+        message = (
+            f'{current_user.full_name} moved "{task.title}" to '
+            f"{new_status} in {project.name}."
+        )
+        for recipient_id in {task.created_by_id, task.assignee_id}:
+            add_project_notification(
+                db,
+                project_id=project_id,
+                user_id=recipient_id,
+                actor_id=current_user.id,
+                type="task_status_changed",
+                message=message,
+            )
 
     db.commit()
     db.refresh(task)
@@ -277,7 +325,7 @@ def create_comment(
     db: DbSession,
     current_user: CurrentUser,
 ):
-    get_project_for_member(project_id, db, current_user)
+    project = get_project_for_member(project_id, db, current_user)
     task = get_task_in_project(db, project_id, task_id)
 
     content = comment_in.content.strip()
@@ -286,6 +334,19 @@ def create_comment(
 
     comment = TaskComment(task_id=task.id, user_id=current_user.id, content=content)
     db.add(comment)
+    message = (
+        f'{current_user.full_name} commented on "{task.title}" '
+        f"in {project.name}."
+    )
+    for recipient_id in {task.created_by_id, task.assignee_id}:
+        add_project_notification(
+            db,
+            project_id=project_id,
+            user_id=recipient_id,
+            actor_id=current_user.id,
+            type="task_commented",
+            message=message,
+        )
     db.commit()
     db.refresh(comment)
     return comment
