@@ -1,3 +1,4 @@
+
 from pathlib import Path
 
 from fastapi import FastAPI, Request
@@ -12,6 +13,7 @@ from app.routers import (
     course_task,
     projects,
     chat,
+    project_tasks,
 )
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,6 +27,7 @@ app.include_router(course_note.router)
 app.include_router(course_task.router)
 app.include_router(projects.router)
 app.include_router(chat.router)
+app.include_router(project_tasks.router)
 
 app.mount(
     "/static",
