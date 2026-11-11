@@ -1,4 +1,3 @@
-
 from app.routers import (
     auth,
     dashboard,
@@ -8,7 +7,9 @@ from app.routers import (
     projects,
     chat,
     project_members,
+    project_tasks,
 )
+
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, Request
@@ -26,6 +27,7 @@ app.include_router(course_task.router)
 app.include_router(projects.router)
 app.include_router(chat.router)
 app.include_router(project_members.router)
+app.include_router(project_tasks.router)
 
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 
