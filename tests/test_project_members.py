@@ -42,12 +42,13 @@ def test_project_owner_can_view_members(client, db_session, test_user):
 
     assert response.status_code == 200
 
-    members = response.json()
+    data = response.json()
 
-    assert len(members) == 1
-    assert members[0]["user_id"] == member.id
-    assert members[0]["full_name"] == "Second User"
-    assert members[0]["role"] == "Developer"
+    assert data["owner"]["user_id"] == test_user.id
+    assert len(data["members"]) == 1
+    assert data["members"][0]["user_id"] == member.id
+    assert data["members"][0]["full_name"] == "Second User"
+    assert data["members"][0]["role"] == "Developer"
 
 
 def test_non_member_cannot_view_project_members(
