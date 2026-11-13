@@ -8,6 +8,7 @@
   const token = localStorage.getItem("access_token");
   const errorBox = document.getElementById("project-settings-error");
   const saveButton = document.getElementById("save-project-settings");
+  const projectBreadcrumb = document.getElementById("project-settings-breadcrumb");
   const nameInput = document.getElementById("settings-project-name");
   const descriptionInput = document.getElementById("settings-project-description");
   const typeInput = document.getElementById("settings-project-type");
@@ -62,6 +63,7 @@
     try {
       const project = await request(`/api/projects/${encodeURIComponent(projectId)}`);
       nameInput.value = project.name || "";
+      projectBreadcrumb.textContent = project.name || "Project";
       descriptionInput.value = project.description || "";
       typeInput.value = project.type || "Solo";
       statusInput.value = project.status || "Ongoing";
