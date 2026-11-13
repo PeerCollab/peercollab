@@ -144,6 +144,16 @@ def create_project(
             db) if project_in.type == "Group" else None,
     )
     db.add(project)
+    db.flush()
+
+    db.add(
+        ProjectMember(
+            project_id=project.id,
+            user_id=current_user.id,
+            role="Owner",
+        )
+    )
+
     db.commit()
     db.refresh(project)
     return project

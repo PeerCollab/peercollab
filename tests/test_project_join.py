@@ -24,11 +24,12 @@ from app.models.project import Project
 from app.models.project_member import ProjectMember
 from app.models.user import User
 from app.routers.projects import (
+    create_project,
     get_my_projects,
     get_project_for_member,
     join_project,
 )
-from app.schemas.projects import ProjectJoin
+from app.schemas.projects import ProjectCreate, ProjectJoin
 
 
 @pytest.fixture
@@ -72,6 +73,28 @@ def project_context():
 
     Base.metadata.drop_all(engine)
     engine.dispose()
+
+
+def test_create_project_adds_owner_as_member(project_context):
+    db, owner, _, _, _ = project_context
+
+    created = create_project(
+        ProjectCreate(
+            name="New project",
+            description="A project created by the owner",
+            type="Group",
+            deadline=None,
+        ),
+        db,
+        owner,
+    )
+
+    membership = (
+        db.query(ProjectMember)
+        .filter_by(project_id=created.id, user_id=owner.id)
+        .one()
+    )
+    assert membership.role == "Owner"
 
 
 def test_join_project_adds_membership_and_lists_project(project_context):
