@@ -6,13 +6,22 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from sqlalchemy import or_
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.project import Project
+from app.models.project_member import ProjectMember
 from app.models.user import User
 # "error"
-from app.schemas.projects import ProjectCreate, ProjectOut, ProjectUpdate
+from app.schemas.projects import (
+    ProjectCreate,
+    ProjectJoin,
+    ProjectListOut,
+    ProjectOut,
+    ProjectUpdate,
+)
 from app.utils.dependencies import get_current_user
 
 router = APIRouter(tags=["Projects"])
@@ -34,6 +43,24 @@ def get_owned_project(project_id: int, db: Session, user: User) -> Project:
         raise HTTPException(status_code=404, detail="Project not found")
     if project.owner_id != user.id:
         raise HTTPException(status_code=403, detail="Not allowed")
+    return project
+
+
+def get_project_for_member(project_id: int, db: Session, user: User) -> Project:
+    project = db.query(Project).filter(Project.id == project_id).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    if project.owner_id != user.id:
+        membership = (
+            db.query(ProjectMember)
+            .filter(
+                ProjectMember.project_id == project_id,
+                ProjectMember.user_id == user.id,
+            )
+            .first()
+        )
+        if membership is None:
+            raise HTTPException(status_code=403, detail="Not allowed")
     return project
 
 
@@ -117,22 +144,102 @@ def create_project(
             db) if project_in.type == "Group" else None,
     )
     db.add(project)
+    db.flush()
+
+    db.add(
+        ProjectMember(
+            project_id=project.id,
+            user_id=current_user.id,
+            role="Owner",
+        )
+    )
+
     db.commit()
     db.refresh(project)
     return project
 
 
-@router.get("/api/projects", response_model=List[ProjectOut])
+@router.get("/api/projects", response_model=List[ProjectListOut])
 def get_my_projects(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return (
+    projects = (
         db.query(Project)
-        .filter(Project.owner_id == current_user.id)
+        .outerjoin(ProjectMember, ProjectMember.project_id == Project.id)
+        .filter(
+            or_(
+                Project.owner_id == current_user.id,
+                ProjectMember.user_id == current_user.id,
+            )
+        )
         .order_by(Project.created_at.desc())
         .all()
     )
+    return [
+        {
+            **ProjectOut.model_validate(project).model_dump(),
+            "is_owner": project.owner_id == current_user.id,
+        }
+        for project in projects
+    ]
+
+
+@router.post(
+    "/api/projects/join",
+    response_model=ProjectOut,
+    status_code=status.HTTP_201_CREATED,
+)
+def join_project(
+    join_in: ProjectJoin,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    project = (
+        db.query(Project)
+        .filter(Project.invite_code == join_in.invite_code.upper())
+        .first()
+    )
+    if project is None:
+        raise HTTPException(status_code=404, detail="Invalid invite code")
+
+    if project.owner_id == current_user.id or (
+        db.query(ProjectMember)
+        .filter(
+            ProjectMember.project_id == project.id,
+            ProjectMember.user_id == current_user.id,
+        )
+        .first()
+        is not None
+    ):
+        raise HTTPException(status_code=409, detail="You are already a member")
+
+    db.add(
+        ProjectMember(
+            project_id=project.id,
+            user_id=current_user.id,
+            role="Member",
+        )
+    )
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        if (
+            db.query(ProjectMember)
+            .filter(
+                ProjectMember.project_id == project.id,
+                ProjectMember.user_id == current_user.id,
+            )
+            .first()
+            is not None
+        ):
+            raise HTTPException(
+                status_code=409, detail="You are already a member"
+            ) from exc
+        raise
+
+    return project
 
 
 @router.get("/api/projects/{project_id}", response_model=ProjectOut)
@@ -141,7 +248,7 @@ def get_project(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return get_owned_project(project_id, db, current_user)
+    return get_project_for_member(project_id, db, current_user)
 
 
 @router.patch("/api/projects/{project_id}", response_model=ProjectOut)

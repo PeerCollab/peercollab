@@ -6,7 +6,7 @@
 <div class="flex items-center gap-2 text-sm">
     <a href="/projects" class="text-slate-400 transition-colors hover:text-brand-600">Projects</a>
     <i data-lucide="chevron-right" class="h-4 w-4 text-slate-300"></i>
-    <a href="/projects/{{ project_id }}" class="text-slate-400 transition-colors hover:text-brand-600">Project</a>
+    <a id="project-settings-breadcrumb" href="/projects/{{ project_id }}" class="text-slate-400 transition-colors hover:text-brand-600">Project</a>
     <i data-lucide="chevron-right" class="h-4 w-4 text-slate-300"></i>
     <span class="font-medium text-slate-700">Project settings</span>
 </div>
@@ -106,5 +106,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/static/js/project_settings.js?v=1" defer></script>
+<script src="/static/js/project_settings.js?v=2" defer></script>
 {% endblock %}
