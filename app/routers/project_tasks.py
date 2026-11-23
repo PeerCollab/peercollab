@@ -21,30 +21,12 @@ from app.schemas.project_tasks import (
     TaskCommentCreate,
     TaskCommentOut,
 )
-from app.utils.dependencies import get_current_user
+from app.utils.dependencies import get_current_user, get_project_for_member
 
 router = APIRouter(prefix="/api/projects/{project_id}", tags=["Project Tasks"])
 
 DbSession = Annotated[Session, Depends(get_db)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
-
-
-def get_project_for_member(project_id: int, db: Session, user: User) -> Project:
-    """Return the project if the user owns it or is a member, otherwise raise."""
-    project = db.get(Project, project_id)
-    if project is None:
-        raise HTTPException(status_code=404, detail="Project not found")
-    if project.owner_id == user.id:
-        return project
-    membership = db.execute(
-        select(ProjectMember.id).where(
-            ProjectMember.project_id == project_id,
-            ProjectMember.user_id == user.id,
-        )
-    ).first()
-    if membership is None:
-        raise HTTPException(status_code=403, detail="Not allowed")
-    return project
 
 
 def get_task_in_project(db: Session, project_id: int, task_id: int) -> ProjectTask:

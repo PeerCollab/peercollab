@@ -15,6 +15,7 @@ def add_project_notification(
     if user_id is None or user_id == actor_id:
         return
 
+    message = message[:255]
     db.add(
         Notification(
             user_id=user_id,

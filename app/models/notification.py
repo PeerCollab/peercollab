@@ -7,7 +7,9 @@ class Notification(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    project_id = Column(Integer, ForeignKey("projects.id"), nullable=True)
+    project_id = Column(
+        Integer, ForeignKey("projects.id", ondelete="CASCADE"), nullable=True
+    )
     type = Column(String(50), nullable=False)
     message = Column(String(255), nullable=False)
     is_read = Column(Boolean, default=False)

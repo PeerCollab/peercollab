@@ -4,7 +4,7 @@ os.environ.setdefault("DATABASE_URL", "sqlite://")
 
 import pytest
 from fastapi import HTTPException
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
@@ -31,9 +31,15 @@ from app.routers.project_notifications import (
     mark_all_project_notifications_read,
     mark_project_notification_read,
 )
-from app.routers.project_tasks import create_comment, create_task, update_task
+from app.routers.project_tasks import (
+    create_comment,
+    create_task,
+    move_task,
+    update_task,
+)
 from app.schemas.project_tasks import (
     ProjectTaskCreate,
+    ProjectTaskMove,
     ProjectTaskUpdate,
     TaskCommentCreate,
     TaskStatus,
@@ -47,6 +53,13 @@ def notification_context():
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
+
+    @event.listens_for(engine, "connect")
+    def enable_foreign_keys(connection, _):
+        cursor = connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
+
     Base.metadata.create_all(engine)
 
     with Session(engine) as db:
@@ -139,6 +152,36 @@ def test_task_status_and_comments_notify_relevant_project_members(notification_c
     ]
 
 
+def test_drag_and_drop_task_move_creates_notification(notification_context):
+    db, owner, member, _, project = notification_context
+    task = create_task(
+        project.id,
+        ProjectTaskCreate(title="Write docs", assignee_id=member.id),
+        db,
+        owner,
+    )
+
+    move_task(
+        project.id,
+        task.id,
+        ProjectTaskMove(status=TaskStatus.doing, position=0),
+        db,
+        owner,
+    )
+
+    notifications = (
+        db.query(Notification)
+        .filter_by(user_id=member.id, project_id=project.id)
+        .order_by(Notification.id)
+        .all()
+    )
+    assert [item.type for item in notifications] == [
+        "task_assigned",
+        "task_status_changed",
+    ]
+    assert "Doing" in notifications[-1].message
+
+
 def test_project_notifications_are_private_and_can_be_marked_read(notification_context):
     db, owner, member, outsider, project = notification_context
     first = Notification(
@@ -162,6 +205,10 @@ def test_project_notifications_are_private_and_can_be_marked_read(notification_c
     assert result["unread_count"] == 1
     assert get_project_unread_count(project.id, db, member)["unread_count"] == 1
     assert [item["id"] for item in result["notifications"]] == [first.id]
+
+    with pytest.raises(HTTPException) as other_users_notification:
+        mark_project_notification_read(project.id, second.id, db, member)
+    assert other_users_notification.value.status_code == 404
 
     marked = mark_project_notification_read(project.id, first.id, db, member)
     assert marked.is_read is True
@@ -195,3 +242,62 @@ def test_mark_all_reads_only_current_users_project_notifications(notification_co
 
     assert db.get(Notification, own.id).is_read is True
     assert db.get(Notification, other_user.id).is_read is False
+
+
+def test_project_notifications_are_deleted_with_the_project(notification_context):
+    db, owner, member, _, project = notification_context
+    notification = Notification(
+        user_id=member.id,
+        project_id=project.id,
+        type="task_assigned",
+        message="Task assigned",
+        is_read=False,
+    )
+    db.add(notification)
+    db.commit()
+    notification_id = notification.id
+
+    db.delete(project)
+    db.commit()
+
+    assert db.get(Notification, notification_id) is None
+
+
+def test_project_notification_message_is_limited_to_column_length(notification_context):
+    from app.services.notifications import add_project_notification
+
+    db, owner, member, _, project = notification_context
+    add_project_notification(
+        db,
+        project_id=project.id,
+        user_id=member.id,
+        actor_id=owner.id,
+        type="task_status_changed",
+        message="x" * 300,
+    )
+    db.flush()
+
+    notification = db.query(Notification).filter_by(user_id=member.id).one()
+    assert len(notification.message) == 255
+
+
+def test_project_notification_list_is_limited_to_latest_100(notification_context):
+    db, _, member, _, project = notification_context
+    db.add_all(
+        [
+            Notification(
+                user_id=member.id,
+                project_id=project.id,
+                type="task_assigned",
+                message=f"Notification {index}",
+                is_read=False,
+            )
+            for index in range(105)
+        ]
+    )
+    db.commit()
+
+    result = list_project_notifications(project.id, db, member)
+
+    assert len(result["notifications"]) == 100
+    assert result["unread_count"] == 105
