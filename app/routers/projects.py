@@ -82,6 +82,7 @@ def project_workspace_page(request: Request, project_id: int, tab: str = "overvi
         "chat": "project/chat.html",
         "files": "project/files.html",
         "members": "project/members.html",
+        "notifications": "project/notifications.html",
     }
     page = page_by_tab.get(tab)
     if page is None:

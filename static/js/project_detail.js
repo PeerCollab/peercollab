@@ -214,5 +214,27 @@
     }
   }
 
+  async function loadProjectNotificationCount() {
+    try {
+      const response = await fetch(
+        `/api/projects/${encodeURIComponent(projectId)}/notifications/unread-count`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (!response.ok) {
+        throw new Error("Could not load the project notification count.");
+      }
+
+      const data = await response.json();
+      const badge = document.getElementById("project-notification-count");
+      if (badge) {
+        badge.textContent = String(data.unread_count);
+        badge.classList.toggle("hidden", data.unread_count < 1);
+      }
+    } catch (error) {
+      console.error("Loading project notification count failed:", error);
+    }
+  }
+
   loadProject();
+  loadProjectNotificationCount();
 })();

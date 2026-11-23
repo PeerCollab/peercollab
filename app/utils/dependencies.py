@@ -6,6 +6,8 @@ from sqlalchemy import select
 from app.database import get_db
 from app.models.user import User
 from app.models.course import Course
+from app.models.project import Project
+from app.models.project_member import ProjectMember
 from app.utils.security import decode_access_token
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
@@ -29,6 +31,24 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         raise credentials_exception
 
     return user
+
+
+def get_project_for_member(project_id: int, db: Session, user: User) -> Project:
+    """Return a project only when the user owns it or is a member."""
+    project = db.get(Project, project_id)
+    if project is None:
+        raise HTTPException(status_code=404, detail="Project not found")
+    if project.owner_id != user.id:
+        membership = db.execute(
+            select(ProjectMember.id).where(
+                ProjectMember.project_id == project_id,
+                ProjectMember.user_id == user.id,
+            )
+        ).first()
+        if membership is None:
+            raise HTTPException(status_code=403, detail="Not allowed")
+    return project
+
 
 def get_owned_course(
     course_id: int,
